@@ -1,0 +1,469 @@
+/* project.css */
+
+/* === ОБЩИЕ === */
+.project-info-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.project-info-card:hover { box-shadow: var(--shadow-md); }
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.user-avatar-small {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-avatar-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* === PROJECT VIEW === */
+.progress-section { margin: 2rem 0; }
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.6s ease-out;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.status-card {
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.status-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+.status-count {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text);
+  display: block;
+}
+
+.status-name {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+  color: var(--text-secondary);
+}
+
+.status-card.NEW        { border-left: 4px solid var(--status-new); }
+.status-card.IN_PROGRESS { border-left: 4px solid var(--status-in-progress); }
+.status-card.REVIEW     { border-left: 4px solid var(--status-review); }
+.status-card.COMPLETED  { border-left: 4px solid var(--status-completed); }
+.status-card.ON_HOLD    { border-left: 4px solid var(--status-on-hold); }
+.status-card.CANCELED   { border-left: 4px solid var(--status-canceled); }
+
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.members-table th,
+.members-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+}
+
+.members-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.profile-link:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.btn-exit {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--error);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.exit-from-project { padding: 0 2rem; }
+
+/* === DOCUMENTS === */
+.documents-section .section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-alt);
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+}
+
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.file-upload-btn:hover { background: var(--primary-hover); }
+
+.selected-file-name {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.document-item:hover { box-shadow: var(--shadow-sm); }
+
+.document-icon .material-icons { color: var(--primary); font-size: 1.6rem; }
+
+.document-info { flex: 1; min-width: 0; }
+
+.document-info a {
+  display: block;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-info a:hover { color: var(--primary); text-decoration: underline; }
+
+.document-info small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.document-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+  align-items: center;
+}
+
+/* === PROJECT NEW === */
+.new-project-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--gap-lg) 1.5rem 6rem;
+}
+
+.new-project-card {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* === PROJECT SETTINGS === */
+.settings-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.settings-card:hover { box-shadow: var(--shadow-md); }
+
+.settings-card h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1.5rem;
+}
+
+.col-main-settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mini-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+
+.mini-table td {
+  padding: 0.5rem 0.25rem;
+  vertical-align: middle;
+}
+
+.mini-table select { min-width: 110px; padding: 0.4rem 0.5rem; font-size: 0.9rem; }
+
+.request-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.request-row:last-child { border-bottom: none; }
+.request-row-buttons { display: flex; }
+
+/* Stats table */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+.stats-table th,
+.stats-table td { padding: 0.5rem; text-align: center; }
+
+.stats-table th {
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.stats-table tbody tr:hover { background: var(--primary-light); }
+
+.user-cell { display: flex; align-items: center; gap: 0.75rem; justify-content: flex-start; }
+
+.sticky-column { position: sticky; left: 0; background: var(--bg); }
+
+.border-NEW        { border-bottom: 1px solid var(--status-new); }
+.border-IN_PROGRESS { border-bottom: 1px solid var(--status-in-progress); }
+.border-REVIEW     { border-bottom: 1px solid var(--status-review); }
+.border-COMPLETED  { border-bottom: 1px solid var(--status-completed); }
+.border-ON_HOLD    { border-bottom: 1px solid var(--status-on-hold); }
+.border-CANCELED   { border-bottom: 1px solid var(--status-canceled); }
+
+.chart-legend-container {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin: 1rem auto;
+}
+
+.chart-wrapper { flex-shrink: 0; width: 200px; height: 200px; }
+
+.legend { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
+
+.legend-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.95rem; }
+
+.legend-color { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+
+.legend-status { font-weight: 500; min-width: 120px; }
+
+.legend-count {
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* === PROJECT SEARCH === */
+.search-container {
+  flex: 1;
+  padding: var(--gap-lg) 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.search-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2rem;
+}
+
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.search-bar:hover { box-shadow: var(--shadow-md); }
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .exit-from-project, .project-content { padding: 0; }
+  .status-grid { grid-template-columns: repeat(3, 1fr); }
+  .project-layout { margin-bottom: 60px; }
+  .chart-legend-container { flex-direction: column; }
+  .new-project-card { padding: 1.5rem; }
+  .page-title { font-size: 1.5rem; }
+  .form-actions { flex-direction: column; }
+  .search-container { padding: 1.5rem 1rem; }
+}
+
+@media (max-width: 576px) {
+  .project-info-card, .settings-card { padding: 1.5rem; }
+}

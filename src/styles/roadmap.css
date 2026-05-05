@@ -1,0 +1,230 @@
+/* roadmap.css */
+
+.roadmap-layout {
+  display: flex;
+  padding: var(--gap-lg) 2rem 0 2rem;
+  width: 100%;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.branch-list {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.branch-list h2 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--text); }
+
+.branch-list .create-branch { margin-bottom: 1.5rem; }
+
+.branch-list form { display: flex; gap: 0.5rem; }
+
+.branch-list input[type='text'] {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.branch-list button[type='submit'] {
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.branch-list button[type='submit']:hover { background: var(--primary-hover); }
+
+.branch-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: grab;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.branch-item:hover { background: var(--primary-light); border-color: var(--primary); }
+
+.main-content { flex: 1; overflow-x: hidden; }
+
+.branch-panel { margin-bottom: 1rem; }
+
+.branch-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--primary-light);
+  padding-bottom: 0.5rem;
+}
+
+.branch-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.btn-edit-branch {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.btn-edit-branch:hover { background: var(--primary-light); color: var(--primary); transform: scale(1.1); }
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: grab;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  border-left: 4px solid transparent;
+}
+
+.task-item[data-status='NEW']        { border-left-color: var(--status-new); }
+.task-item[data-status='IN_PROGRESS'] { border-left-color: var(--status-in-progress); }
+.task-item[data-status='REVIEW']     { border-left-color: var(--status-review); }
+.task-item[data-status='COMPLETED']  { border-left-color: var(--status-completed); }
+.task-item[data-status='ON_HOLD']    { border-left-color: var(--status-on-hold); }
+.task-item[data-status='CANCELED']   { border-left-color: var(--status-canceled); }
+
+.task-item:last-child { margin-bottom: 1rem; }
+.task-item.dragging { opacity: 0.7; transform: rotate(1deg); box-shadow: var(--shadow-md); }
+
+.task-item.highlighted .roadmap-task-card { background: var(--primary-light); }
+
+.number {
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.roadmap-task-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: none;
+  background: transparent;
+}
+
+.remove-from-branch-btn {
+  background: transparent;
+  border: none;
+  color: var(--error);
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  margin-right: 0.5rem;
+}
+
+.remove-from-branch-btn:hover { opacity: 1; }
+
+.add-task-control { text-align: right; }
+
+.btn-save-tasks {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-save-tasks:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+.btn-save { margin-top: 1rem; padding: 0.75rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; }
+
+.task-selection-list {
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.task-selection-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.select-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .roadmap-layout { flex-direction: column; padding: 1rem; }
+  .branch-list { width: 100%; max-width: none; }
+}

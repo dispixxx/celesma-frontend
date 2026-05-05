@@ -1,0 +1,55 @@
+/* alert.css — глобальные уведомления */
+
+.global-alert {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 400px;
+  max-width: 600px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2000;
+  animation: slideInDown 0.3s ease;
+}
+
+.global-alert.success { border-left: 4px solid var(--role-member); }
+.global-alert.error   { border-left: 4px solid var(--role-admin); }
+.global-alert.info    { border-left: 4px solid var(--primary); }
+
+.global-alert-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.global-alert .material-icons { color: var(--primary); }
+.global-alert.error .material-icons { color: var(--error); }
+
+.close-alert {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.close-alert:hover { background: rgba(0, 0, 0, 0.1); }
+
+@media (max-width: 480px) {
+  .global-alert { min-width: calc(100vw - 2rem); }
+}

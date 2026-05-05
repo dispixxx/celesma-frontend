@@ -1,0 +1,543 @@
+/* profile.css */
+
+.profile-container {
+  flex: 1;
+  padding: var(--gap-lg) 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.profile-avatar-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+/* Голографическая радужная обводка */
+.profile-avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--bg-alt);
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 0 20px rgba(102, 126, 234, 0.3),
+    0 0 40px rgba(102, 126, 234, 0.2),
+    inset 0 0 20px rgba(102, 126, 234, 0.1);
+}
+
+/* Анимированная радужная обводка */
+.profile-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #667eea 0deg,
+    #764ba2 60deg,
+    #f093fb 120deg,
+    #4facfe 180deg,
+    #00f2fe 240deg,
+    #667eea 300deg,
+    #667eea 360deg
+  );
+  animation: rotate-gradient 4s linear infinite;
+  z-index: -1;
+}
+
+/* Внутренний круг для маскировки */
+.profile-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: var(--bg-alt);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+@keyframes rotate-gradient {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar span {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 48px;
+}
+
+/* Плавающие частицы вокруг аватара */
+.avatar-pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+  animation: pulse-ring 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Морфинг обводка */
+.water-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px; height: 220px;
+  border-radius: 30% 70% 70% 30%/30% 30% 70% 70%;
+  background: linear-gradient(45deg, 
+    rgba(102, 126, 234, 0.15),
+    rgba(118, 75, 162, 0.15),
+    rgba(240, 147, 251, 0.15)
+  );
+  animation: water-ring-anim 8s ease-in-out infinite;
+  z-index: 1;
+  filter: blur(2px);
+}
+
+/* Дополнительные световые блики */
+.profile-avatar-container::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.4), transparent);
+  border-radius: 50%;
+  animation: float-particle 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+.profile-avatar-container::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(240, 147, 251, 0.3), transparent);
+  border-radius: 50%;
+  animation: float-particle 8s ease-in-out infinite reverse;
+  z-index: 0;
+}
+
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  25% { transform: translate(10px, -15px) scale(1.1); opacity: 0.8; }
+  50% { transform: translate(-5px, -25px) scale(0.9); opacity: 0.5; }
+  75% { transform: translate(-15px, -10px) scale(1.05); opacity: 0.7; }
+}
+
+@keyframes water-ring-anim {
+  0%   { 
+    border-radius: 30% 70% 70% 30%/30% 30% 70% 70%; 
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  25%  { 
+    border-radius: 58% 42% 75% 25%/76% 46% 54% 24%; 
+    transform: translate(-50%, -50%) rotate(90deg) scale(1.05);
+  }
+  50%  { 
+    border-radius: 50% 50% 33% 67%/55% 27% 73% 45%; 
+    transform: translate(-50%, -50%) rotate(180deg) scale(0.95);
+  }
+  75%  { 
+    border-radius: 33% 67% 58% 42%/63% 68% 32% 37%; 
+    transform: translate(-50%, -50%) rotate(270deg) scale(1.02);
+  }
+  100% { 
+    border-radius: 30% 70% 70% 30%/30% 30% 70% 70%; 
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0%   { 
+    transform: translate(-50%, -50%) scale(0.85); 
+    opacity: 0.3; 
+  }
+  50%  { 
+    transform: translate(-50%, -50%) scale(1.15);   
+    opacity: 0.6; 
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(0.85); 
+    opacity: 0.3; 
+  }
+}
+
+/* 3D эффект при наведении */
+.profile-avatar-container:hover .profile-avatar {
+  transform: scale(1.1) translateZ(20px);
+  box-shadow: 
+    0 0 40px rgba(102, 126, 234, 0.6),
+    0 0 80px rgba(102, 126, 234, 0.4),
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(102, 126, 234, 0.2);
+}
+
+.profile-avatar-container:hover .water-ring {
+  animation-duration: 4s;
+  filter: blur(1px);
+  opacity: 0.8;
+}
+
+.profile-avatar-container:hover .avatar-pulse-ring {
+  animation-duration: 1.5s;
+}
+
+.profile-name { 
+  font-size: 2rem; 
+  font-weight: 700; 
+  color: var(--text); 
+  margin: 0 0 0.5rem;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.profile-fullname { 
+  margin: 0 0 0.5rem; 
+  font-size: 1.125rem; 
+  font-weight: 500; 
+  color: var(--text);
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+.profile-email { 
+  color: var(--text-secondary); 
+  margin: 0 0 1.5rem; 
+  font-size: 0.95rem;
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  animation: fadeInUp 0.6s ease-out 0.7s both;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Анимированный фон при наведении */
+.btn-outline::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--primary-light);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+  z-index: -1;
+}
+
+.btn-outline:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-outline:hover { 
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.profile-details {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out 0.8s both;
+}
+
+/* Световой блик при наведении */
+.profile-details::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(102, 126, 234, 0.1) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.profile-details:hover::before {
+  opacity: 1;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translate(-50%, -50%) scale(0.8); }
+  50% { transform: translate(-30%, -30%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(0.8); }
+}
+
+.profile-details:hover { 
+  box-shadow: 
+    var(--shadow-md),
+    0 0 20px rgba(102, 126, 234, 0.2),
+    inset 0 0 20px rgba(102, 126, 234, 0.05);
+  transform: translateY(-2px);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.detail-item { display: flex; margin-bottom: 1.25rem; }
+.detail-item:last-child { margin-bottom: 0; }
+.detail-label { min-width: 160px; color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
+.detail-value { flex: 1; color: var(--text); font-weight: 500; line-height: 1.5; }
+
+/* Stats */
+.stats-section {
+  margin-top: 1rem;
+  padding: 2rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(102, 126, 234, 0.1),
+    transparent
+  );
+  animation: slide-shine 3s ease-in-out infinite;
+}
+
+@keyframes slide-shine {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card { 
+  text-align: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
+.stat-value { 
+  font-size: 1.8rem; 
+  font-weight: 700; 
+  background: linear-gradient(135deg, var(--primary), #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.stat-label { 
+  font-size: 0.9rem; 
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Edit modal */
+.profile-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.profile-modal-content {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 50px rgba(102, 126, 234, 0.3);
+  max-height: 90vh;
+  overflow: visible;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Светящаяся рамка модалки */
+.profile-modal-content::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(102, 126, 234, 0.5) 50%,
+    transparent 70%
+  );
+  background-size: 200% 200%;
+  animation: border-glow 3s linear infinite;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+/* Маскирующий слой для фона */
+.profile-modal-content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg-alt);
+  border-radius: 0.75rem;
+  z-index: -1;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes border-glow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.avatar-upload { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+
+.avatar-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary-light);
+  background: var(--bg);
+}
+
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Стили для полей ввода в модалке */
+.profile-modal-content input,
+.profile-modal-content textarea {
+  resize: vertical;
+  max-height: 200px;
+  min-height: 40px;
+}
+
+.profile-modal-content textarea {
+  min-height: 80px;
+  max-height: 150px;
+}
+
+/* Запрет изменения ширины */
+.profile-modal-content input {
+  resize: none;
+}
+
+@media (max-width: 768px) {
+  .profile-container { padding: 2rem 1rem; }
+  .profile-avatar { width: 140px; height: 140px; }
+  .water-ring { width: 160px; height: 160px; }
+  .profile-actions { flex-direction: column; width: 100%; max-width: 320px; }
+  .profile-details, .stats-section { padding: 1.5rem; }
+}

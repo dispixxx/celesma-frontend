@@ -1,0 +1,114 @@
+/* variables.css — CSS переменные и темы */
+
+:root {
+  --bg: #f8fafc;
+  --bg-alt: #fff;
+  --text: #1e293b;
+  --white: white;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --primary: #4361ee;
+  --primary-light: #e0e7ff;
+  --primary-hover: #3a56d4;
+  --error: #ef4444;
+
+  --bg-role-admin: #ffebee;
+  --role-admin: #c62828;
+  --bg-role-manager: #e8f5e9;
+  --role-manager: #2e7d32;
+  --bg-role-member: #e3f2fd;
+  --role-member: #1565c0;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  --transition: all 0.3s ease;
+  --gap-md: 1.5rem;
+  --gap-lg: 3rem;
+
+  --navbar-height: 85px;
+  --navbar-height-wrap: 100px;
+  --sidebar-width: 220px;
+
+  --status-new: #6b7280;
+  --status-in-progress: #3b82f6;
+  --status-review: #8b5cf6;
+  --status-completed: #22c55e;
+  --status-on-hold: #f97316;
+  --status-canceled: #ef4444;
+}
+
+html[data-theme='dark'] {
+  --bg: #111827;
+  --bg-alt: #1f2937;
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border: #374151;
+  --primary: #667eea;
+  --primary-light: #1e3a8a;
+  --primary-hover: #5a67d8;
+  --bg-role-admin: #3f1d1d;
+  --role-admin: #ef5350;
+  --bg-role-manager: #1d3d23;
+  --role-manager: #66bb6a;
+  --bg-role-member: #1d3557;
+  --role-member: #64b5f6;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='monodark'] {
+  --bg: #111827;
+  --bg-alt: #1f2937;
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border: #374151;
+  --primary: #667eea;
+  --primary-light: #1e3a8a;
+  --primary-hover: #5a67d8;
+  --bg-role-admin: #3f1d1d;
+  --role-admin: #ef5350;
+  --bg-role-manager: #1d3d23;
+  --role-manager: #66bb6a;
+  --bg-role-member: #1d3557;
+  --role-member: #64b5f6;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='mirror'] {
+  --bg: rgba(30, 30, 40, 0.4);
+  --bg-alt: rgba(40, 40, 55, 0.5);
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border: rgba(120, 120, 160, 0.2);
+  --primary: #667eea;
+  --primary-light: #1e3a8a;
+  --primary-hover: #5a67d8;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme='cosmic'] {
+  --bg: linear-gradient(135deg, #0b0c1a 0%, #12142a 25%, #1a1c38 50%, #0f172a 75%, #090b15 100%);
+  --bg-alt: rgba(20, 25, 40, 0.6);
+  --text: #e0e6ff;
+  --text-secondary: #a0aec0;
+  --border: rgba(100, 120, 180, 0.2);
+  --primary: #8ab4f8;
+  --primary-light: rgba(138, 180, 248, 0.15);
+  --primary-hover: #9cc4fc;
+  --bg-role-admin: rgba(194, 24, 91, 0.15);
+  --role-admin: #f08080;
+  --bg-role-manager: rgba(33, 150, 243, 0.15);
+  --role-manager: #64b5f6;
+  --bg-role-member: rgba(76, 175, 80, 0.15);
+  --role-member: #81c784;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(138, 180, 248, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(138, 180, 248, 0.15);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

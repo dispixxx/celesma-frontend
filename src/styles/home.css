@@ -1,0 +1,136 @@
+/* home.css */
+
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--gap-lg) 2rem;
+  flex: 1;
+  width: 100%;
+}
+
+.home-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.request-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.username { color: var(--primary); font-weight: 600; }
+
+.home-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-bottom: var(--gap-lg);
+}
+
+.link-create-new-project,
+.link-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.link-create-new-project:hover,
+.link-search:hover { opacity: 0.8; }
+
+.projects-section { margin-bottom: var(--gap-lg); }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--gap-md);
+}
+
+.project-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.project-card:hover { box-shadow: var(--shadow-md); }
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.project-header h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  word-break: break-word;
+}
+
+.project-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.role-ADMIN    { background: var(--bg-role-admin);   color: var(--role-admin); }
+.role-MODERATOR { background: var(--bg-role-manager); color: var(--role-manager); }
+.role-MEMBER   { background: var(--bg-role-member);  color: var(--role-member); }
+.role-VIEWER   { background: var(--border);           color: var(--text-secondary); }
+
+.project-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.project-meta { display: flex; justify-content: flex-end; }
+
+.open-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.2s;
+}
+
+.open-link:hover { color: var(--primary-hover); }
+
+@media (max-width: 768px) {
+  .home-container { padding: 2rem 1rem; }
+  .home-actions { flex-direction: column; margin-bottom: 2rem; }
+  .projects-section { margin-bottom: 2rem; }
+  .home-title, .request-title { font-size: 1.8rem; }
+  .projects-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
