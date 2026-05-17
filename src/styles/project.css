@@ -7,16 +7,37 @@
   border-radius: 0.75rem;
   padding: 2rem;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.project-info-card:hover { box-shadow: var(--shadow-md); }
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-info-card:hover { 
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--text), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
 }
 
 .user-avatar-small {
@@ -55,8 +76,16 @@
 
 .progress-fill {
   height: 100%;
-  background: var(--primary);
+  background: linear-gradient(90deg, var(--primary), #764ba2, var(--primary));
+  background-size: 200% 100%;
   transition: width 0.6s ease-out;
+  animation: progress-shine 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+@keyframes progress-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .progress-text {
@@ -78,10 +107,16 @@
   font-size: 0.875rem;
   background: var(--bg-alt);
   border: 1px solid var(--border);
-  transition: var(--transition);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
 }
 
-.status-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.status-card:hover { 
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
 
 .status-count {
   font-weight: 700;
@@ -156,7 +191,32 @@
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-exit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-exit:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-exit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
 }
 
 .exit-from-project { padding: 0 2rem; }
@@ -322,6 +382,12 @@
   font-weight: 600;
   color: var(--text);
   margin: 0 0 1.5rem;
+}
+
+.settings-card textarea {
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
 }
 
 .col-main-settings-container {

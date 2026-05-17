@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../api/client';
 import MainLayout from '../components/layout/MainLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
+import { useAuthStore } from '../store/authStore';
 
 interface UserProfile {
   id: number;
@@ -17,11 +18,13 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
+  const currentUsername = useAuthStore((state) => state.username);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', bio: '' });
   const { alert, showAlert, hideAlert } = useAlert();
+  const isOwnProfile = currentUsername && currentUsername === username;
 
   useEffect(() => {
     api.get(`/users/${username}`)
@@ -45,7 +48,6 @@ export default function ProfilePage() {
     }
   };
 
-  // const initials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || user.username.slice(0, 2).toUpperCase() : '?';
   const initials = user?.username ? user.username.slice(0, 2).toUpperCase() : '?';
 
   if (loading) return <MainLayout><div className="empty-state"><p>Загрузка...</p></div></MainLayout>;
@@ -75,10 +77,12 @@ export default function ProfilePage() {
           <p className="profile-email">{user.email}</p>
 
           <div className="profile-actions">
-            <button className="btn-primary" onClick={() => setEditOpen(true)}>
-              <span className="material-icons">edit</span>
-              Редактировать
-            </button>
+            {isOwnProfile && (
+              <button className="btn-primary" onClick={() => setEditOpen(true)}>
+                <span className="material-icons">edit</span>
+                Редактировать
+              </button>
+            )}
           </div>
         </div>
 
@@ -96,7 +100,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {editOpen && (
+      {isOwnProfile && editOpen && (
         <div className="profile-modal" onClick={(e) => { if (e.target === e.currentTarget) setEditOpen(false); }}>
           <div className="profile-modal-content">
             <h2>Редактировать профиль</h2>

@@ -37,6 +37,9 @@
   --status-completed: #22c55e;
   --status-on-hold: #f97316;
   --status-canceled: #ef4444;
+
+  --calendar-icon-filter: invert(0.5);
+  --calendar-icon-filter-hover: invert(0.3) sepia(1) saturate(5) hue-rotate(210deg);
 }
 
 html[data-theme='dark'] {
@@ -57,6 +60,8 @@ html[data-theme='dark'] {
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  --calendar-icon-filter: invert(0.8);
+  --calendar-icon-filter-hover: invert(1) sepia(1) saturate(5) hue-rotate(210deg);
 }
 
 html[data-theme='monodark'] {

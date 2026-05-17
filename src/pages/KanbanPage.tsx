@@ -6,6 +6,7 @@ import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
+import { useProjectRole } from '../hooks/useProjectRole';
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'NEW',         label: 'To Do' },
@@ -18,6 +19,7 @@ const COLUMNS: { status: TaskStatus; label: string }[] = [
 
 export default function KanbanPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const userRole = useProjectRole(projectId);
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const { alert, showAlert, hideAlert } = useAlert();
@@ -41,10 +43,10 @@ export default function KanbanPage() {
 
   const getTasksByStatus = (status: TaskStatus) => tasks.filter((t) => t.status === status);
 
-  if (loading) return <ProjectLayout><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
+  if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
 
   return (
-    <ProjectLayout>
+    <ProjectLayout userRole={userRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="kanban-container">

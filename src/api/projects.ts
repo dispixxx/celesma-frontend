@@ -37,4 +37,10 @@ export const projectsApi = {
 
   declineApplicant: (projectId: number, userId: number) =>
     api.delete(`/projects/${projectId}/applicants/${userId}`),
+
+  updateMemberRole: (projectId: number, memberId: number, role: string) =>
+    api.put(`/projects/${projectId}/members/${memberId}/role`, { role }),
+
+  removeMember: (projectId: number, memberId: number) =>
+    api.delete(`/projects/${projectId}/members/${memberId}`),
 };

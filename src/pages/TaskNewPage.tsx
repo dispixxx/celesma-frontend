@@ -4,10 +4,12 @@ import { tasksApi } from '../api/tasks';
 import { projectsApi } from '../api/projects';
 import type { TaskPriority, MemberDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
+import { useProjectRole } from '../hooks/useProjectRole';
 
 export default function TaskNewPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const userRole = useProjectRole(projectId);
   const [members, setMembers] = useState<MemberDto[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -17,6 +19,7 @@ export default function TaskNewPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -29,6 +32,22 @@ export default function TaskNewPage() {
     const d = new Date();
     d.setDate(d.getDate() + days);
     setForm({ ...form, endDate: d.toISOString().split('T')[0] });
+  };
+
+  const handleGenerateTitle = async () => {
+    if (!form.description.trim()) {
+      setErrors((prev) => ({ ...prev, description: 'Сначала напишите описание задачи' }));
+      return;
+    }
+    setAiGenerating(true);
+    try {
+      const generatedTitle = await tasksApi.generateTitle(form.description);
+      setForm((prev) => ({ ...prev, title: generatedTitle }));
+    } catch {
+      setErrors((prev) => ({ ...prev, general: 'Не удалось сгенерировать название. Попробуйте позже.' }));
+    } finally {
+      setAiGenerating(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,8 +72,8 @@ export default function TaskNewPage() {
   );
 
   return (
-    <ProjectLayout>
-      <div className="project-content" style={{ maxWidth: '800px' }}>
+    <ProjectLayout userRole={userRole}>
+      <div className="project-content" style={{ maxWidth: '800px', margin: '0 auto' }}>
         <div className="task-form-card">
           <h1 className="form-title">Новая задача</h1>
 
@@ -63,7 +82,30 @@ export default function TaskNewPage() {
           <form className="task-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Название <span className="required">*</span></label>
-              <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Название задачи" maxLength={255} />
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Название задачи"
+                  maxLength={255}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  className="btn-ai-generate"
+                  onClick={handleGenerateTitle}
+                  disabled={aiGenerating}
+                  title="Сгенерировать название задачи через AI на основе описания"
+                >
+                  {aiGenerating ? (
+                    <span className="spinner" />
+                  ) : (
+                    <span className="material-icons" style={{ fontSize: '1.2rem' }}>auto_awesome</span>
+                  )}
+                  <span>{aiGenerating ? 'Генерация...' : 'AI'}</span>
+                </button>
+              </div>
               {errors.title && <small className="error">{errors.title}</small>}
             </div>
 
@@ -114,7 +156,19 @@ export default function TaskNewPage() {
 
             <div className="form-group">
               <label>Приоритет</label>
-              <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value as TaskPriority })}>
+              <select 
+                id="priority" 
+                value={form.priority} 
+                onChange={(e) => setForm({ ...form, priority: e.target.value as TaskPriority })}
+                style={{
+                  borderLeft: `4px solid ${
+                    form.priority === 'LOW' ? '#22c55e' : 
+                    form.priority === 'MEDIUM' ? '#f97316' : 
+                    form.priority === 'HIGH' ? '#ef4444' : 'var(--border)'
+                  }`,
+                  paddingLeft: '1rem'
+                }}
+              >
                 <option value="LOW">Низкий</option>
                 <option value="MEDIUM">Средний</option>
                 <option value="HIGH">Высокий</option>

@@ -48,6 +48,7 @@ export interface MemberDto {
   user: UserSummary;
   role: ProjectRole;
   joinedAt: string;
+  isOwner: boolean;
 }
 
 export interface ProjectResponse {
@@ -90,4 +91,21 @@ export interface TaskRequest {
   assigneeId: number;
   priority: TaskPriority;
   endDate: string;
+}
+
+// AI
+export interface AiTitleRequest {
+  description: string;
+}
+
+// Comment
+export interface CommentResponse {
+  id: number;
+  text: string;
+  author: UserSummary;
+  createdAt: string;
+}
+
+export interface CommentRequest {
+  text: string;
 }

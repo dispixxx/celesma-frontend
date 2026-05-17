@@ -30,8 +30,9 @@
   padding: 1.25rem 0;
   position: sticky;
   top: var(--navbar-height);
+  height: calc(100vh - var(--navbar-height));
   z-index: 100;
-  overflow: visible;
+  overflow-y: auto;
   flex-shrink: 0;
 }
 

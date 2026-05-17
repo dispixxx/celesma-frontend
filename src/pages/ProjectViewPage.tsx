@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
 import { tasksApi } from '../api/tasks';
 import type { ProjectResponse, TaskStatus } from '../types';
@@ -14,6 +14,8 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 
 export default function ProjectViewPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [project, setProject] = useState<ProjectResponse | null>(null);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,16 @@ export default function ProjectViewPage() {
   };
 
   useEffect(() => { loadProject(); }, [projectId]);
+
+  // Показ ошибки из state (например, при редиректе с настроек)
+  useEffect(() => {
+    const state = location.state as { error?: string } | null;
+    if (state?.error) {
+      showAlert(state.error, 'error');
+      // Очищаем state чтобы не показывать повторно при обновлении
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleJoin = async () => {
     setJoinLoading(true);
@@ -71,7 +83,7 @@ export default function ProjectViewPage() {
   const isMember = project.currentUserRole !== 'VIEWER';
 
   return (
-    <ProjectLayout isMember={isMember}>
+    <ProjectLayout isMember={isMember} userRole={project.currentUserRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="two-cols">
@@ -148,7 +160,12 @@ export default function ProjectViewPage() {
                 </p>
                 <div className="status-grid">
                   {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((st) => (
-                    <div key={st} className={`status-card ${st}`}>
+                    <div 
+                      key={st} 
+                      className={`status-card ${st}`}
+                      onClick={() => navigate(`/projects/${projectId}/tasks?status=${st}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="status-count">{statusCounts[st] || 0}</span>
                       <span className="status-name">{STATUS_LABELS[st]}</span>
                     </div>
@@ -168,7 +185,22 @@ export default function ProjectViewPage() {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {project.members.map((m) => (
-                  <div key={m.memberId} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Link
+                    key={m.memberId}
+                    to={`/profile/${m.user.username}`}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      padding: '0.5rem',
+                      borderRadius: '8px',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-secondary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
                     <UserAvatar username={m.user.username} avatarUrl={m.user.avatarUrl} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -181,7 +213,7 @@ export default function ProjectViewPage() {
                       )}
                     </div>
                     <span className={`project-role role-${m.role}`}>{m.role}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

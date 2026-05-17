@@ -7,6 +7,9 @@ import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
 import { STATUS_LABELS } from '../components/ui/StatusDot';
+import { useProjectRole } from '../hooks/useProjectRole';
+import { commentsApi } from '../api/comments';
+import type { CommentResponse } from '../types';
 
 const STATUSES: TaskStatus[] = ['NEW', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELED'];
 const PRIORITY_COLORS = { LOW: '#22c55e', MEDIUM: '#f97316', HIGH: '#ef4444' };
@@ -14,12 +17,15 @@ const PRIORITY_COLORS = { LOW: '#22c55e', MEDIUM: '#f97316', HIGH: '#ef4444' };
 export default function TaskViewPage() {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const navigate = useNavigate();
+  const userRole = useProjectRole(projectId);
   const [task, setTask] = useState<TaskResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusPopup, setStatusPopup] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
-  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<CommentResponse[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const { alert, showAlert, hideAlert } = useAlert();
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +46,33 @@ export default function TaskViewPage() {
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, []);
+
+  useEffect(() => {
+    if (!taskId) return;
+    tasksApi.getById(Number(taskId))
+      .then(setTask)
+      .catch(() => showAlert('Ошибка загрузки задачи', 'error'))
+      .finally(() => setLoading(false));
+    // Загружаем комментарии
+    commentsApi.getByTask(Number(taskId))
+      .then(setComments)
+      .catch(() => { });
+  }, [taskId]);
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim() || !taskId) return;
+    setIsSending(true);
+    try {
+      const newComment = await commentsApi.create(Number(taskId), commentText);
+      setComments((prev) => [newComment, ...prev]);
+      setCommentText('');
+    } catch {
+      showAlert('Ошибка отправки комментария', 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const changeStatus = async (status: TaskStatus) => {
     if (!task) return;
@@ -78,11 +111,11 @@ export default function TaskViewPage() {
     }
   };
 
-  if (loading) return <ProjectLayout><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
-  if (!task) return <ProjectLayout><div className="empty-state"><p>Задача не найдена</p></div></ProjectLayout>;
+  if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
+  if (!task) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Задача не найдена</p></div></ProjectLayout>;
 
   return (
-    <ProjectLayout>
+    <ProjectLayout userRole={userRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="task-detail-card">
@@ -121,24 +154,34 @@ export default function TaskViewPage() {
 
         <section className="task-meta-grid">
           <div className="meta-item">
-            <div className="avatar-with-label">
-              <UserAvatar username={task.creator.username} avatarUrl={task.creator.avatarUrl} />
-            </div>
-            <div className="meta-info">
-              <span className="label">Создатель</span>
-              <span className="value">{task.creator.username}</span>
-            </div>
+            <Link
+              to={`/profile/${task.creator.username}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}
+            >
+              <div className="avatar-with-label">
+                <UserAvatar username={task.creator.username} avatarUrl={task.creator.avatarUrl} />
+              </div>
+              <div className="meta-info">
+                <span className="label">Создатель</span>
+                <span className="value">{task.creator.username}</span>
+              </div>
+            </Link>
           </div>
 
           {task.assignee && (
             <div className="meta-item">
-              <div className="avatar-with-label">
-                <UserAvatar username={task.assignee.username} avatarUrl={task.assignee.avatarUrl} />
-              </div>
-              <div className="meta-info">
-                <span className="label">Исполнитель</span>
-                <span className="value">{task.assignee.username}</span>
-              </div>
+              <Link
+                to={`/profile/${task.assignee.username}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="avatar-with-label">
+                  <UserAvatar username={task.assignee.username} avatarUrl={task.assignee.avatarUrl} />
+                </div>
+                <div className="meta-info">
+                  <span className="label">Исполнитель</span>
+                  <span className="value">{task.assignee.username}</span>
+                </div>
+              </Link>
             </div>
           )}
 
@@ -170,13 +213,18 @@ export default function TaskViewPage() {
 
           {task.reviewedBy && (
             <div className="meta-item">
-              <div className="avatar-with-label">
-                <UserAvatar username={task.reviewedBy.username} avatarUrl={task.reviewedBy.avatarUrl} />
-              </div>
-              <div className="meta-info">
-                <span className="label">Проверено</span>
-                <span className="value">{task.reviewedBy.username}</span>
-              </div>
+              <Link
+                to={`/profile/${task.reviewedBy.username}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="avatar-with-label">
+                  <UserAvatar username={task.reviewedBy.username} avatarUrl={task.reviewedBy.avatarUrl} />
+                </div>
+                <div className="meta-info">
+                  <span className="label">Проверено</span>
+                  <span className="value">{task.reviewedBy.username}</span>
+                </div>
+              </Link>
             </div>
           )}
         </section>
@@ -193,18 +241,47 @@ export default function TaskViewPage() {
         {/* Comments */}
         <div className="comments-section">
           <h3>Комментарии</h3>
-          <form className="comment-form" onSubmit={(e) => { e.preventDefault(); showAlert('Комментарии будут добавлены позже', 'info'); }}>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Напишите комментарий..."
-              required
-            />
-            <button type="submit" className="btn-action">Отправить</button>
-          </form>
+
+          {!isSending && (
+            <form className="comment-form" onSubmit={handleCommentSubmit}>
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Напишите комментарий..."
+                required
+                rows={3}
+              />
+              <button type="submit" className="btn-action" disabled={!commentText.trim()}>
+                Отправить
+              </button>
+            </form>
+          )}
+
           <div className="comments-list-container">
             <div className="comments-list">
-              <div className="empty-comments"><p>Пока нет комментариев</p></div>
+              {comments.length === 0 ? (
+                <div className="empty-comments"><p>Пока нет комментариев</p></div>
+              ) : (
+                comments.map((c) => (
+                  <div key={c.id} className="comment-item">
+                    <div className="comment-avatar">
+                      {c.author.avatarUrl
+                        ? <img src={c.author.avatarUrl} alt={c.author.username} />
+                        : <span>{c.author.username.slice(0, 2).toUpperCase()}</span>
+                      }
+                    </div>
+                    <div className="comment-body">
+                      <div className="comment-header">
+                        <Link to={`/profile/${c.author.username}`} style={{ fontWeight: 600, color: 'var(--text)', textDecoration: 'none' }}>
+                          {c.author.username}
+                        </Link>
+                        <span className="comment-date">{new Date(c.createdAt).toLocaleString('ru-RU')}</span>
+                      </div>
+                      <p className="comment-text">{c.text}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

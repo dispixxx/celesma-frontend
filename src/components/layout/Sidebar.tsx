@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 
+import type { ProjectRole } from '../../types';
+
 interface SidebarProps {
   isMember?: boolean;
+  userRole?: ProjectRole;
 }
 
-export default function Sidebar({ isMember = true }: SidebarProps) {
+export default function Sidebar({ isMember = true, userRole }: SidebarProps) {
   const { projectId } = useParams();
   const [open, setOpen] = useState(false);
 
   if (!projectId) return null;
+
+  const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
   const links = [
     { to: `/projects/${projectId}`,         icon: 'home',        label: 'Обзор' },
@@ -17,7 +22,7 @@ export default function Sidebar({ isMember = true }: SidebarProps) {
     { to: `/projects/${projectId}/kanban`,   icon: 'view_kanban', label: 'Канбан' },
     { to: `/projects/${projectId}/roadmap`,  icon: 'map',         label: 'Роадмап' },
     { to: `/projects/${projectId}/chat`,     icon: 'chat',        label: 'Чат' },
-    { to: `/projects/${projectId}/settings`, icon: 'settings',    label: 'Настройки' },
+    ...(isAdmin ? [{ to: `/projects/${projectId}/settings`, icon: 'settings', label: 'Настройки' }] : []),
   ];
 
   return (

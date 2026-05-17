@@ -1,5 +1,5 @@
 import api from './client';
-import type { TaskRequest, TaskResponse, TaskStatus } from '../types';
+import type { AiTitleRequest, TaskRequest, TaskResponse, TaskStatus } from '../types';
 
 export const tasksApi = {
   getByProject: (projectId: number) =>
@@ -22,4 +22,8 @@ export const tasksApi = {
 
   getHistory: (taskId: number) =>
     api.get<any[]>(`/tasks/${taskId}/history`).then((r) => r.data),
+
+  generateTitle: (description: string) =>
+    api.post<string>('/tasks/generate-title', { description } as AiTitleRequest)
+       .then((r) => r.data),
 };

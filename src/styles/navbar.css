@@ -11,6 +11,8 @@
   top: 0;
   z-index: 100;
   height: var(--navbar-height);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .top-nav__logo {
@@ -23,6 +25,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.top-nav__logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
 }
 
 .top-nav__menu {
@@ -36,7 +45,20 @@
   font-weight: 500;
   padding: 0.5rem 0;
   position: relative;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.top-nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), #764ba2);
+  border-radius: 1px;
+  transition: width 0.3s ease;
 }
 
 .top-nav__link:hover,
@@ -44,15 +66,12 @@
   color: var(--primary);
 }
 
-.top-nav__link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.top-nav__link:hover::after {
   width: 100%;
-  height: 2px;
-  background: var(--primary);
-  border-radius: 1px;
+}
+
+.top-nav__link.active::after {
+  width: 100%;
 }
 
 /* Профиль */
@@ -65,12 +84,35 @@
   padding: 0.5rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   background: none;
   border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.profile-trigger:hover { background: var(--primary-light); }
+.profile-trigger::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--primary-light);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+  z-index: -1;
+}
+
+.profile-trigger:hover::before {
+  width: 200px;
+  height: 200px;
+}
+
+.profile-trigger:hover {
+  transform: scale(1.05);
+}
 
 .user-avatar {
   width: 36px;
@@ -104,13 +146,15 @@
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 30px rgba(102, 126, 234, 0.2);
   min-width: 200px;
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1000;
 }
 
@@ -118,7 +162,7 @@
 .dropdown-menu.open {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .dropdown-item {
@@ -128,16 +172,19 @@
   padding: 0.75rem 1rem;
   text-decoration: none;
   color: var(--text);
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   font-size: 0.95rem;
   background: none;
   border: none;
   width: 100%;
   text-align: left;
   cursor: pointer;
+  position: relative;
 }
 
-.dropdown-item:hover { background: var(--primary-light); }
+.dropdown-item:hover { 
+  background: var(--primary-light);
+}
 
 .dropdown-item .material-icons {
   font-size: 1.1rem;

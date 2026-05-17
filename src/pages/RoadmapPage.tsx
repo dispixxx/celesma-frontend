@@ -5,6 +5,7 @@ import { tasksApi } from '../api/tasks';
 import type { TaskResponse } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
+import { useProjectRole } from '../hooks/useProjectRole';
 
 interface Branch {
   id: number;
@@ -20,6 +21,7 @@ interface TaskEntry {
 
 export default function RoadmapPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const userRole = useProjectRole(projectId);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [entries, setEntries] = useState<Record<number, TaskEntry[]>>({});
   const [allTasks, setAllTasks] = useState<TaskResponse[]>([]);
@@ -102,10 +104,10 @@ export default function RoadmapPage() {
     t.title.toLowerCase().includes(taskSearch.toLowerCase())
   );
 
-  if (loading) return <ProjectLayout><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
+  if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
 
   return (
-    <ProjectLayout>
+    <ProjectLayout userRole={userRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="roadmap-layout">

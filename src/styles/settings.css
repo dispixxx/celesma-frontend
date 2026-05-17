@@ -78,6 +78,13 @@
   box-shadow: 0 0 0 2px var(--primary-light);
 }
 
+/* Ограничение изменения размера textarea */
+.settings-container textarea {
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
+}
+
 /* Telegram */
 .command-copy-row {
   display: flex;

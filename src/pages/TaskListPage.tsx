@@ -1,22 +1,33 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { tasksApi } from '../api/tasks';
 import type { TaskResponse, TaskStatus } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
+import { useProjectRole } from '../hooks/useProjectRole';
 
 const PRIORITY_LABELS = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий' };
 
 export default function TaskListPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const [searchParams] = useSearchParams();
+  const userRole = useProjectRole(projectId);
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [filtered, setFiltered] = useState<TaskResponse[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const { alert, showAlert, hideAlert } = useAlert();
+
+  // Читаем параметр status из URL при загрузке
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      setStatusFilter([statusParam as TaskStatus]);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -39,7 +50,7 @@ export default function TaskListPage() {
   const STATUSES: TaskStatus[] = ['NEW', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELED'];
 
   return (
-    <ProjectLayout>
+    <ProjectLayout userRole={userRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
