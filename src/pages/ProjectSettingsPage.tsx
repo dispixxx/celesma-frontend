@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
-import type { ProjectResponse, UserSummary, ProjectRole } from '../types';
+import type { ProjectResponseDto, ApplicantResponseDto, ProjectRole } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
+import { useAuthStore } from '../store/authStore';
+import { getCurrentUserRole, isProjectMember, getMemberCount, isOwner as isProjectOwner } from '../utils/projectUtils';
 
 export default function ProjectSettingsPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [project, setProject] = useState<ProjectResponse | null>(null);
-  const [applicants, setApplicants] = useState<UserSummary[]>([]);
+  const { username } = useAuthStore();
+  const [project, setProject] = useState<ProjectResponseDto | null>(null);
+  const [applicants, setApplicants] = useState<ApplicantResponseDto[]>([]);
   const [form, setForm] = useState({ name: '', description: '' });
   const [loading, setLoading] = useState(true);
   const { alert, showAlert, hideAlert } = useAlert();
@@ -34,12 +37,14 @@ export default function ProjectSettingsPage() {
 
   useEffect(() => { loadData(); }, [projectId]);
 
+  const currentUserRole = project ? getCurrentUserRole(project, username) : 'VIEWER';
+
   // Проверка прав доступа
   useEffect(() => {
-    if (!loading && project && project.currentUserRole !== 'ADMIN' && project.currentUserRole !== 'MODERATOR') {
+    if (!loading && project && currentUserRole !== 'OWNER' && currentUserRole !== 'ADMIN' && currentUserRole !== 'MODERATOR') {
       navigate(`/projects/${projectId}`, { state: { error: 'У вас нет прав для доступа к настройкам проекта' } });
     }
-  }, [loading, project, projectId, navigate]);
+  }, [loading, project, currentUserRole, projectId, navigate]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,12 +111,14 @@ export default function ProjectSettingsPage() {
   if (loading) return <ProjectLayout><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
   if (!project) return <ProjectLayout><div className="empty-state"><p>Проект не найден</p></div></ProjectLayout>;
 
-  const isMember = project.currentUserRole !== 'VIEWER';
-  const isAdmin = project.currentUserRole === 'ADMIN';
-  const isModerator = project.currentUserRole === 'MODERATOR';
+  const isMember = isProjectMember(project, username);
+  const isOwner = currentUserRole === 'OWNER';
+  const isAdmin = currentUserRole === 'ADMIN';
+  const isModerator = currentUserRole === 'MODERATOR';
+  const memberCount = getMemberCount(project);
 
   return (
-    <ProjectLayout isMember={isMember} userRole={project.currentUserRole}>
+    <ProjectLayout isMember={isMember} userRole={currentUserRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="two-cols">
@@ -119,7 +126,7 @@ export default function ProjectSettingsPage() {
           <div className="col-main-settings-container">
 
             {/* Редактирование проекта */}
-            {(isAdmin || isModerator) && (
+            {(isOwner || isAdmin || isModerator) && (
               <div className="settings-card">
                 <h2>Основная информация</h2>
                 <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -149,7 +156,7 @@ export default function ProjectSettingsPage() {
             )}
 
             {/* Заявки на вступление */}
-            {(isAdmin || isModerator) && (
+            {(isOwner || isAdmin || isModerator) && (
               <div className="settings-card">
                 <h2>
                   Заявки на вступление
@@ -176,17 +183,17 @@ export default function ProjectSettingsPage() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {applicants.map((applicant) => (
-                      <div key={applicant.id} className="request-row">
+                      <div key={applicant.user.id} className="request-row">
                         <Link 
-                          to={`/profile/${applicant.username}`}
+                          to={`/profile/${applicant.user.username}`}
                           style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}
                         >
-                          <UserAvatar username={applicant.username} avatarUrl={applicant.avatarUrl} />
+                          <UserAvatar username={applicant.user.username} avatarUrl={applicant.user.avatarUrl} />
                           <div>
-                            <div style={{ fontWeight: 600 }}>{applicant.username}</div>
-                            {(applicant.firstName || applicant.lastName) && (
+                            <div style={{ fontWeight: 600 }}>{applicant.user.username}</div>
+                            {(applicant.user.firstName || applicant.user.lastName) && (
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                {applicant.firstName} {applicant.lastName}
+                                {applicant.user.firstName} {applicant.user.lastName}
                               </div>
                             )}
                           </div>
@@ -195,7 +202,7 @@ export default function ProjectSettingsPage() {
                           <button
                             className="btn-primary"
                             style={{ padding: '0.4rem 0.9rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                            onClick={() => handleAccept(applicant.id)}
+                            onClick={() => handleAccept(applicant.user.id)}
                           >
                             <span className="material-icons" style={{ fontSize: '1rem' }}>check</span>
                             Принять
@@ -203,7 +210,7 @@ export default function ProjectSettingsPage() {
                           <button
                             className="btn-secondary"
                             style={{ padding: '0.4rem 0.9rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                            onClick={() => handleDecline(applicant.id)}
+                            onClick={() => handleDecline(applicant.user.id)}
                           >
                             <span className="material-icons" style={{ fontSize: '1rem' }}>close</span>
                             Отклонить
@@ -217,7 +224,7 @@ export default function ProjectSettingsPage() {
             )}
 
             {/* Удаление проекта */}
-            {isAdmin && (
+            {(isOwner || isAdmin) && (
               <div className="settings-card">
                 <h2>Опасная зона</h2>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
@@ -236,7 +243,7 @@ export default function ProjectSettingsPage() {
           <div className="settings-card">
             <h2>Участники</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Всего: {project.memberCount}
+              Всего: {memberCount}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {project.members.map((m) => (
@@ -266,7 +273,7 @@ export default function ProjectSettingsPage() {
                     </div>
                   </Link>
                   
-                  {(isAdmin || isModerator) && !m.isOwner ? (
+                  {(isOwner || isAdmin || isModerator) && !isProjectOwner(project, m.user.username) ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <select
                         value={m.role}
@@ -283,7 +290,7 @@ export default function ProjectSettingsPage() {
                       >
                         <option value="MEMBER">MEMBER</option>
                         <option value="MODERATOR">MODERATOR</option>
-                        {isAdmin && <option value="ADMIN">ADMIN</option>}
+                        {(isOwner || isAdmin) && <option value="ADMIN">ADMIN</option>}
                       </select>
                       <button
                         onClick={() => handleRemoveMember(m.memberId, m.user.username)}

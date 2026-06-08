@@ -18,6 +18,8 @@
   --role-manager: #2e7d32;
   --bg-role-member: #e3f2fd;
   --role-member: #1565c0;
+  --bg-role-owner: #fff8e1;
+  --role-owner: #f57f17;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -57,6 +59,8 @@ html[data-theme='dark'] {
   --role-manager: #66bb6a;
   --bg-role-member: #1d3557;
   --role-member: #64b5f6;
+  --bg-role-owner: #3d2f1f;
+  --role-owner: #ffd54f;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
@@ -79,6 +83,8 @@ html[data-theme='monodark'] {
   --role-manager: #66bb6a;
   --bg-role-member: #1d3557;
   --role-member: #64b5f6;
+  --bg-role-owner: #3d2f1f;
+  --role-owner: #ffd54f;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
@@ -112,6 +118,8 @@ html[data-theme='cosmic'] {
   --role-manager: #64b5f6;
   --bg-role-member: rgba(76, 175, 80, 0.15);
   --role-member: #81c784;
+  --bg-role-owner: rgba(255, 193, 7, 0.15);
+  --role-owner: #ffd54f;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(138, 180, 248, 0.1);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(138, 180, 248, 0.15);

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
-import type { ProjectResponse } from '../types';
+import type { ProjectResponseDto } from '../types';
+import { useAuthStore } from '../store/authStore';
+import { getCurrentUserRole, getMemberCount } from '../utils/projectUtils';
 
 export default function ProjectsPage() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  const { username } = useAuthStore();
+  const [projects, setProjects] = useState<ProjectResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,16 +30,20 @@ export default function ProjectsPage() {
         <p className="empty">У вас пока нет проектов</p>
       ) : (
         <div className="projects-grid">
-          {projects.map((p) => (
-            <div key={p.id} className="project-card" onClick={() => navigate(`/projects/${p.id}`)}>
-              <h2>{p.name}</h2>
-              <p>{p.description}</p>
-              <div className="project-meta">
-                <span className={`role role-${p.currentUserRole}`}>{p.currentUserRole}</span>
-                <span>{p.memberCount} участников</span>
+          {projects.map((p) => {
+            const role = getCurrentUserRole(p, username);
+            const count = getMemberCount(p);
+            return (
+              <div key={p.id} className="project-card" onClick={() => navigate(`/projects/${p.id}`)}>
+                <h2>{p.name}</h2>
+                <p>{p.description}</p>
+                <div className="project-meta">
+                  <span className={`role role-${role}`}>{role}</span>
+                  <span>{count} участников</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

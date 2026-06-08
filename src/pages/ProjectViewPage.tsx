@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
 import { tasksApi } from '../api/tasks';
-import type { ProjectResponse, TaskStatus } from '../types';
+import type { ProjectResponseDto, TaskStatus, ApplicantResponseDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
+import { useAuthStore } from '../store/authStore';
+import { getCurrentUserRole, isProjectMember, getMemberCount, isApplicant as checkIsApplicant } from '../utils/projectUtils';
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
   NEW: 'Новые', IN_PROGRESS: 'В работе', REVIEW: 'Проверка',
@@ -16,7 +18,9 @@ export default function ProjectViewPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [project, setProject] = useState<ProjectResponse | null>(null);
+  const { username } = useAuthStore();
+  const [project, setProject] = useState<ProjectResponseDto | null>(null);
+  const [applicants, setApplicants] = useState<ApplicantResponseDto[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
@@ -27,8 +31,10 @@ export default function ProjectViewPage() {
     Promise.all([
       projectsApi.getById(Number(projectId)),
       tasksApi.getByProject(Number(projectId)).catch(() => []),
-    ]).then(([proj, tasks]) => {
+      projectsApi.getApplicants(Number(projectId)).catch(() => []),
+    ]).then(([proj, tasks, apps]) => {
       setProject(proj);
+      setApplicants(apps);
       const counts: Record<string, number> = {};
       tasks.forEach((t: any) => { counts[t.status] = (counts[t.status] || 0) + 1; });
       setStatusCounts(counts);
@@ -80,10 +86,13 @@ export default function ProjectViewPage() {
   const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   const completed = statusCounts['COMPLETED'] || 0;
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const isMember = project.currentUserRole !== 'VIEWER';
+  const isMember = isProjectMember(project, username);
+  const currentUserRole = getCurrentUserRole(project, username);
+  const memberCount = getMemberCount(project);
+  const userIsApplicant = checkIsApplicant(applicants, username);
 
   return (
-    <ProjectLayout isMember={isMember} userRole={project.currentUserRole}>
+    <ProjectLayout isMember={isMember} userRole={currentUserRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
       <div className="two-cols">
@@ -114,7 +123,7 @@ export default function ProjectViewPage() {
                   Подайте заявку на вступление — администратор рассмотрит её и примет решение.
                 </p>
 
-                {project.isApplicant ? (
+                {userIsApplicant ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -181,7 +190,7 @@ export default function ProjectViewPage() {
             <div className="project-info-card">
               <h2 className="section-title">Участники</h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                Всего: {project.memberCount}
+                Всего: {memberCount}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {project.members.map((m) => (
@@ -221,22 +230,7 @@ export default function ProjectViewPage() {
         )}
       </div>
 
-      {isMember && (
-        <div className="exit-from-project">
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            if (!confirm('Вы действительно хотите выйти?')) return;
-            try {
-              await projectsApi.exit(Number(projectId));
-              window.location.href = '/home';
-            } catch (err: any) {
-              showAlert(err.response?.data?.message || 'Ошибка', 'error');
-            }
-          }}>
-            <button type="submit" className="btn-exit">Выйти из проекта</button>
-          </form>
-        </div>
-      )}
+
     </ProjectLayout>
   );
 }

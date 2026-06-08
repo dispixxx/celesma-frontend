@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { projectsApi } from '../api/projects';
-import type { ProjectResponse } from '../types';
+import type { ProjectResponseDto } from '../types';
 import MainLayout from '../components/layout/MainLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
+import { getCurrentUserRole } from '../utils/projectUtils';
 
 export default function HomePage() {
   const username = useAuthStore((s) => s.username);
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  const [projects, setProjects] = useState<ProjectResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const { alert, showAlert, hideAlert } = useAlert();
 
@@ -55,22 +56,25 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="projects-grid">
-              {projects.map((p) => (
-                <Link key={p.id} to={`/projects/${p.id}`} className="project-card">
-                  <div className="project-header">
-                    <h3>{p.name}</h3>
-                    <span className={`project-role role-${p.currentUserRole}`}>
-                      {p.currentUserRole}
-                    </span>
-                  </div>
-                  <p className="project-description">{p.description}</p>
-                  <div className="project-meta">
-                    <span className="open-link">
-                      Открыть <span className="material-icons" style={{ fontSize: '1rem' }}>arrow_forward</span>
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {projects.map((p) => {
+                const role = getCurrentUserRole(p, username);
+                return (
+                  <Link key={p.id} to={`/projects/${p.id}`} className="project-card">
+                    <div className="project-header">
+                      <h3>{p.name}</h3>
+                      <span className={`project-role role-${role}`}>
+                        {role}
+                      </span>
+                    </div>
+                    <p className="project-description">{p.description}</p>
+                    <div className="project-meta">
+                      <span className="open-link">
+                        Открыть <span className="material-icons" style={{ fontSize: '1rem' }}>arrow_forward</span>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

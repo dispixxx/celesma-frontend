@@ -20,12 +20,13 @@ export interface RegisterRequest {
 }
 
 // User
-export interface UserSummary {
+export interface UserResponseDto {
   id: number;
   username: string;
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
+  role: string;
 }
 
 export interface User {
@@ -41,25 +42,27 @@ export interface User {
 }
 
 // Project
-export type ProjectRole = 'ADMIN' | 'MODERATOR' | 'MEMBER' | 'VIEWER';
+export type ProjectRole = 'OWNER' | 'ADMIN' | 'MODERATOR' | 'MEMBER' | 'VIEWER';
 
-export interface MemberDto {
+export interface MemberResponseDto {
   memberId: number;
-  user: UserSummary;
+  user: UserResponseDto;
   role: ProjectRole;
   joinedAt: string;
-  isOwner: boolean;
 }
 
-export interface ProjectResponse {
+export interface ProjectResponseDto {
   id: number;
   name: string;
   description: string;
-  owner: UserSummary;
-  memberCount: number;
-  currentUserRole: ProjectRole;
-  isApplicant: boolean;
-  members: MemberDto[];
+  owner: UserResponseDto;
+  members: MemberResponseDto[];
+}
+
+export interface ApplicantResponseDto {
+  projectId: number;
+  user: UserResponseDto;
+  requestAt: string;
 }
 
 export interface ProjectRequest {
@@ -76,9 +79,9 @@ export interface TaskResponse {
   title: string;
   description: string;
   createdAt: string;
-  assignee: UserSummary | null;
-  creator: UserSummary;
-  reviewedBy: UserSummary | null;
+  assignee: UserResponseDto | null;
+  creator: UserResponseDto;
+  reviewedBy: UserResponseDto | null;
   endDate: string;
   projectId: number;
   status: TaskStatus;
@@ -88,21 +91,28 @@ export interface TaskResponse {
 export interface TaskRequest {
   title: string;
   description: string;
-  assigneeId: number;
+  assigneeId: number | null;
   priority: TaskPriority;
   endDate: string;
 }
 
 // AI
+export type AiDescriptionAction = 'TITLE' | 'IMPROVE' | 'FORMALIZE' | 'SUBTASKS';
+
 export interface AiTitleRequest {
   description: string;
+}
+
+export interface AiDescriptionRequest {
+  description: string;
+  action: AiDescriptionAction;
 }
 
 // Comment
 export interface CommentResponse {
   id: number;
   text: string;
-  author: UserSummary;
+  author: UserResponseDto;
   createdAt: string;
 }
 

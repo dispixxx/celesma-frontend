@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tasksApi } from '../api/tasks';
 import { projectsApi } from '../api/projects';
-import type { TaskPriority, MemberDto } from '../types';
+import type { AiDescriptionAction, TaskPriority, MemberResponseDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import { useProjectRole } from '../hooks/useProjectRole';
 
@@ -10,7 +10,7 @@ export default function TaskNewPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const userRole = useProjectRole(projectId);
-  const [members, setMembers] = useState<MemberDto[]>([]);
+  const [members, setMembers] = useState<MemberResponseDto[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
@@ -19,7 +19,8 @@ export default function TaskNewPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiGeneratingTitle, setAiGeneratingTitle] = useState(false);
+  const [aiProcessingDesc, setAiProcessingDesc] = useState(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -39,14 +40,27 @@ export default function TaskNewPage() {
       setErrors((prev) => ({ ...prev, description: 'Сначала напишите описание задачи' }));
       return;
     }
-    setAiGenerating(true);
+    setAiGeneratingTitle(true);
     try {
       const generatedTitle = await tasksApi.generateTitle(form.description);
       setForm((prev) => ({ ...prev, title: generatedTitle }));
     } catch {
       setErrors((prev) => ({ ...prev, general: 'Не удалось сгенерировать название. Попробуйте позже.' }));
     } finally {
-      setAiGenerating(false);
+      setAiGeneratingTitle(false);
+    }
+  };
+
+  const handleAiProcessDescription = async (action: AiDescriptionAction) => {
+    if (!form.description.trim()) return;
+    setAiProcessingDesc(true);
+    try {
+      const result = await tasksApi.aiProcess(form.description, action);
+      setForm((prev) => ({ ...prev, description: result }));
+    } catch {
+      setErrors((prev) => ({ ...prev, general: 'Ошибка AI-обработки. Попробуйте позже.' }));
+    } finally {
+      setAiProcessingDesc(false);
     }
   };
 
@@ -81,36 +95,69 @@ export default function TaskNewPage() {
 
           <form className="task-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Название <span className="required">*</span></label>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Название задачи"
-                  maxLength={255}
-                  style={{ flex: 1 }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label style={{ marginBottom: 0 }}>Название <span className="required">*</span></label>
                 <button
                   type="button"
-                  className="btn-ai-generate"
+                  className="btn-ai"
                   onClick={handleGenerateTitle}
-                  disabled={aiGenerating}
+                  disabled={aiGeneratingTitle || !form.description.trim()}
                   title="Сгенерировать название задачи через AI на основе описания"
                 >
-                  {aiGenerating ? (
+                  {aiGeneratingTitle ? (
                     <span className="spinner" />
                   ) : (
-                    <span className="material-icons" style={{ fontSize: '1.2rem' }}>auto_awesome</span>
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>auto_awesome</span>
                   )}
-                  <span>{aiGenerating ? 'Генерация...' : 'AI'}</span>
+                  <span>{aiGeneratingTitle ? '...' : 'AI название'}</span>
                 </button>
               </div>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Название задачи"
+                maxLength={255}
+              />
               {errors.title && <small className="error">{errors.title}</small>}
             </div>
 
             <div className="form-group">
-              <label>Описание <span className="required">*</span></label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label style={{ marginBottom: 0 }}>Описание <span className="required">*</span></label>
+                <div className="btn-ai-group">
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('IMPROVE')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Улучшить описание: исправить ошибки, сделать конкретнее"
+                  >
+                    {aiProcessingDesc ? <span className="spinner" /> : <span className="material-icons" style={{ fontSize: '0.95rem' }}>spellcheck</span>}
+                    <span>{aiProcessingDesc ? '' : 'Улучшить'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('FORMALIZE')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Формализовать в официально-деловом стиле"
+                  >
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>description</span>
+                    <span>Формализовать</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('SUBTASKS')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Разбить описание на подзадачи"
+                  >
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>format_list_numbered</span>
+                    <span>На подзадачи</span>
+                  </button>
+                </div>
+              </div>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Описание задачи" maxLength={1200} />
               {errors.description && <small className="error">{errors.description}</small>}
             </div>

@@ -14,7 +14,7 @@ export default function Sidebar({ isMember = true, userRole }: SidebarProps) {
 
   if (!projectId) return null;
 
-  const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR';
+  const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'MODERATOR';
 
   const links = [
     { to: `/projects/${projectId}`,         icon: 'home',        label: 'Обзор' },

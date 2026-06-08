@@ -191,6 +191,7 @@
 .role-MODERATOR { background: var(--bg-role-manager); color: var(--role-manager); }
 .role-MEMBER   { background: var(--bg-role-member);  color: var(--role-member); }
 .role-VIEWER   { background: var(--border);           color: var(--text-secondary); }
+.role-OWNER    { background: var(--bg-role-owner);    color: var(--role-owner); font-weight: 700; }
 
 .project-description {
   font-size: 0.95rem;

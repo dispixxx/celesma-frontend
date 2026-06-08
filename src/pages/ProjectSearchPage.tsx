@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
-import type { ProjectResponse } from '../types';
+import type { ProjectResponseDto } from '../types';
 import MainLayout from '../components/layout/MainLayout';
+import { useAuthStore } from '../store/authStore';
+import { getCurrentUserRole } from '../utils/projectUtils';
 
 export default function ProjectSearchPage() {
+  const { username } = useAuthStore();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<ProjectResponse[]>([]);
+  const [results, setResults] = useState<ProjectResponseDto[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -53,20 +56,23 @@ export default function ProjectSearchPage() {
 
         {results.length > 0 && (
           <div className="projects-grid">
-            {results.map((p) => (
-              <div key={p.id} className="project-card">
-                <div className="project-header">
-                  <h3>{p.name}</h3>
-                  <span className={`project-role role-${p.currentUserRole}`}>
-                    {p.currentUserRole}
-                  </span>
+            {results.map((p) => {
+              const role = getCurrentUserRole(p, username);
+              return (
+                <div key={p.id} className="project-card">
+                  <div className="project-header">
+                    <h3>{p.name}</h3>
+                    <span className={`project-role role-${role}`}>
+                      {role}
+                    </span>
+                  </div>
+                  <p className="project-description">{p.description}</p>
+                  <div className="project-meta">
+                    <Link to={`/projects/${p.id}`} className="open-link">Открыть →</Link>
+                  </div>
                 </div>
-                <p className="project-description">{p.description}</p>
-                <div className="project-meta">
-                  <Link to={`/projects/${p.id}`} className="open-link">Открыть →</Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

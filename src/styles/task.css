@@ -181,6 +181,14 @@
   color: var(--text);
   margin-bottom: 0.5rem;
 }
+/* Ошибка валидации полей формы */
+small.error {
+  color: var(--error);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  display: block;
+}
+
 
 /* Цветовые индикаторы для приоритета */
 .form-group select#priority option[value="LOW"] {
@@ -661,64 +669,56 @@
   .task-detail-card { padding: 1.5rem; }
   .project-layout { margin-bottom: 60px; }
 }
-/* === AI Generate Button === */
-.btn-ai-generate {
+/* === AI Buttons === */
+.btn-ai-group {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.btn-ai {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
-  background: linear-gradient(135deg, var(--primary), #8b5cf6);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
 }
 
-.btn-ai-generate::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  transition: left 0.5s;
+.btn-ai:hover:not(:disabled) {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.btn-ai-generate:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-ai-generate:hover:not(:disabled)::before {
-  left: 100%;
-}
-
-.btn-ai-generate:active:not(:disabled) {
+.btn-ai:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.btn-ai-generate:disabled {
-  opacity: 0.7;
+.btn-ai:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Spinner for AI button */
+/* Spinner for AI button (small, inherits color from button) */
 .spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
+  opacity: 0.5;
 }
 
 @keyframes spin {

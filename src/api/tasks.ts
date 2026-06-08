@@ -1,5 +1,12 @@
 import api from './client';
-import type { AiTitleRequest, TaskRequest, TaskResponse, TaskStatus } from '../types';
+import type {
+  AiDescriptionAction,
+  AiDescriptionRequest,
+  AiTitleRequest,
+  TaskRequest,
+  TaskResponse,
+  TaskStatus,
+} from '../types';
 
 export const tasksApi = {
   getByProject: (projectId: number) =>
@@ -25,5 +32,9 @@ export const tasksApi = {
 
   generateTitle: (description: string) =>
     api.post<string>('/tasks/generate-title', { description } as AiTitleRequest)
+       .then((r) => r.data),
+
+  aiProcess: (description: string, action: AiDescriptionAction) =>
+    api.post<string>('/tasks/ai-process', { description, action } as AiDescriptionRequest)
        .then((r) => r.data),
 };

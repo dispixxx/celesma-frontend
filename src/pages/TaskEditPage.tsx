@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tasksApi } from '../api/tasks';
 import { projectsApi } from '../api/projects';
-import type { TaskPriority, TaskResponse, MemberDto } from '../types';
+import type { AiDescriptionAction, TaskPriority, TaskResponse, MemberResponseDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import { useProjectRole } from '../hooks/useProjectRole';
@@ -12,7 +12,7 @@ export default function TaskEditPage() {
   const navigate = useNavigate();
   const userRole = useProjectRole(projectId);
   const [original, setOriginal] = useState<TaskResponse | null>(null);
-  const [members, setMembers] = useState<MemberDto[]>([]);
+  const [members, setMembers] = useState<MemberResponseDto[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
@@ -22,7 +22,8 @@ export default function TaskEditPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiGeneratingTitle, setAiGeneratingTitle] = useState(false);
+  const [aiProcessingDesc, setAiProcessingDesc] = useState(false);
   const { alert, showAlert, hideAlert } = useAlert();
 
   useEffect(() => {
@@ -64,14 +65,27 @@ export default function TaskEditPage() {
       setErrors((prev) => ({ ...prev, description: 'Сначала напишите описание задачи' }));
       return;
     }
-    setAiGenerating(true);
+    setAiGeneratingTitle(true);
     try {
       const generatedTitle = await tasksApi.generateTitle(form.description);
       setForm((prev) => ({ ...prev, title: generatedTitle }));
     } catch {
       showAlert('Не удалось сгенерировать название. Попробуйте позже.', 'error');
     } finally {
-      setAiGenerating(false);
+      setAiGeneratingTitle(false);
+    }
+  };
+
+  const handleAiProcessDescription = async (action: AiDescriptionAction) => {
+    if (!form.description.trim()) return;
+    setAiProcessingDesc(true);
+    try {
+      const result = await tasksApi.aiProcess(form.description, action);
+      setForm((prev) => ({ ...prev, description: result }));
+    } catch {
+      showAlert('Ошибка AI-обработки. Попробуйте позже.', 'error');
+    } finally {
+      setAiProcessingDesc(false);
     }
   };
 
@@ -131,30 +145,29 @@ export default function TaskEditPage() {
 
           <form className="task-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Название <span className="required">*</span></label>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  maxLength={255}
-                  style={{ flex: 1 }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label style={{ marginBottom: 0 }}>Название <span className="required">*</span></label>
                 <button
                   type="button"
-                  className="btn-ai-generate"
+                  className="btn-ai"
                   onClick={handleGenerateTitle}
-                  disabled={aiGenerating}
+                  disabled={aiGeneratingTitle || !form.description.trim()}
                   title="Сгенерировать название задачи через AI на основе описания"
                 >
-                  {aiGenerating ? (
+                  {aiGeneratingTitle ? (
                     <span className="spinner" />
                   ) : (
-                    <span className="material-icons" style={{ fontSize: '1.2rem' }}>auto_awesome</span>
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>auto_awesome</span>
                   )}
-                  <span>{aiGenerating ? 'Генерация...' : 'AI'}</span>
+                  <span>{aiGeneratingTitle ? '...' : 'AI название'}</span>
                 </button>
               </div>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                maxLength={255}
+              />
               {original && form.title !== original.title && (
                 <button type="button" className="btn-reset" onClick={() => resetField('title')} style={{ marginTop: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.85rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}>↩ Сбросить</button>
               )}
@@ -162,12 +175,47 @@ export default function TaskEditPage() {
             </div>
 
             <div className="form-group">
-              <label>Описание</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label style={{ marginBottom: 0 }}>Описание</label>
+                <div className="btn-ai-group">
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('IMPROVE')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Улучшить описание: исправить ошибки, сделать конкретнее"
+                  >
+                    {aiProcessingDesc ? <span className="spinner" /> : <span className="material-icons" style={{ fontSize: '0.95rem' }}>spellcheck</span>}
+                    <span>{aiProcessingDesc ? '' : 'Улучшить'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('FORMALIZE')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Формализовать в официально-деловом стиле"
+                  >
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>description</span>
+                    <span>Формализовать</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ai"
+                    onClick={() => handleAiProcessDescription('SUBTASKS')}
+                    disabled={aiProcessingDesc || !form.description.trim()}
+                    title="Разбить описание на подзадачи"
+                  >
+                    <span className="material-icons" style={{ fontSize: '0.95rem' }}>format_list_numbered</span>
+                    <span>На подзадачи</span>
+                  </button>
+                </div>
+              </div>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 maxLength={1200}
               />
+              {errors.description && <small className="error">{errors.description}</small>}
               {original && form.description !== (original.description || '') && (
                 <button type="button" className="btn-reset" onClick={() => resetField('description')} style={{ marginTop: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.85rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}>↩ Сбросить</button>
               )}
@@ -208,6 +256,7 @@ export default function TaskEditPage() {
                   </>
                 )}
               </button>
+              {errors.assigneeId && <small className="error">{errors.assigneeId}</small>}
               {original && form.assigneeId !== (original.assignee?.id || 0) && (
                 <button type="button" className="btn-reset" onClick={() => resetField('assigneeId')} style={{ marginTop: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.85rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}>↩ Сбросить</button>
               )}
@@ -232,6 +281,7 @@ export default function TaskEditPage() {
                 <option value="MEDIUM">Средний</option>
                 <option value="HIGH">Высокий</option>
               </select>
+              {errors.priority && <small className="error">{errors.priority}</small>}
               {original && form.priority !== original.priority && (
                 <button type="button" className="btn-reset" onClick={() => resetField('priority')} style={{ marginTop: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.85rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}>↩ Сбросить</button>
               )}
@@ -250,6 +300,7 @@ export default function TaskEditPage() {
                   <button key={d} type="button" className="btn-date" onClick={() => setQuickDate(d)}>+{d} дн.</button>
                 ))}
               </div>
+              {errors.endDate && <small className="error">{errors.endDate}</small>}
               {original && original.endDate && (() => {
                 const parts = original.endDate.split('.');
                 const originalFormatted = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : original.endDate;
