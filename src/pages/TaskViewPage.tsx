@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { tasksApi } from '../api/tasks';
-import type { TaskResponse, TaskStatus } from '../types';
+import type { TaskResponse, TaskStatus, TaskHistoryResponse } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
@@ -22,7 +22,7 @@ export default function TaskViewPage() {
   const [loading, setLoading] = useState(true);
   const [statusPopup, setStatusPopup] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<TaskHistoryResponse[]>([]);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [commentText, setCommentText] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -296,18 +296,25 @@ export default function TaskViewPage() {
               <button className="close-btn" onClick={() => setHistoryOpen(false)}>×</button>
             </div>
             <div className="modal-body">
-              {history.length === 0
-                ? <div className="loading">История пуста</div>
-                : history.map((item, i) => (
-                  <div key={i} className="history-item">
+              {history.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                  <span className="material-icons" style={{ fontSize: '3rem', opacity: 0.3 }}>history</span>
+                  <p>История изменений пуста</p>
+                </div>
+              ) : (
+                history.map((item) => (
+                  <div key={item.id} className="history-item">
                     <div className="history-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <UserAvatar username={item.changedBy.username} avatarUrl={item.changedBy.avatarUrl} size="small" />
+                        <span className="history-changed-by">{item.changedBy.username}</span>
+                      </div>
                       <span className="history-date">{item.changedAt}</span>
-                      <span className="history-changed-by">{item.changedBy}</span>
                     </div>
                     <p className="history-description">{item.description}</p>
                   </div>
                 ))
-              }
+              )}
             </div>
           </div>
         </div>

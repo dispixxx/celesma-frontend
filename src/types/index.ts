@@ -119,3 +119,11 @@ export interface CommentResponse {
 export interface CommentRequest {
   text: string;
 }
+
+// Task History
+export interface TaskHistoryResponse {
+  id: number;
+  changedBy: UserResponseDto;
+  description: string;
+  changedAt: string;
+}

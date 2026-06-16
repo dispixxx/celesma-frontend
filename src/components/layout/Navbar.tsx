@@ -33,7 +33,7 @@ export default function Navbar() {
       <div className="profile-dropdown">
         <button className="profile-trigger">
           <UserAvatar username={username || ''} avatarUrl={avatarUrl} size="small" />
-          <span>{username}</span>
+          <span className='profile-username'>{username}</span>
         </button>
 
         <div className="dropdown-menu">

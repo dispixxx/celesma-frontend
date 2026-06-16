@@ -91,6 +91,10 @@
   overflow: hidden;
 }
 
+.profile-username{
+  color: var(--text);
+}
+
 .profile-trigger::before {
   content: '';
   position: absolute;
