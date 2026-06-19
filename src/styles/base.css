@@ -44,14 +44,15 @@ input, textarea, select {
 /* Лейаут */
 .project-layout {
   display: flex;
-  flex: 1;
-  min-height: calc(100vh - var(--navbar-height));
+  height: calc(100vh - var(--navbar-height));
+  overflow: hidden;
 }
 
 .project-content {
   flex: 1;
   padding: 1.5rem;
-  overflow-y: visible;
+  overflow-y: auto;
+  min-width: 0;
 }
 
 .two-cols {

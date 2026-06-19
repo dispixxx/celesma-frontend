@@ -41,6 +41,17 @@ export default function KanbanPage() {
     }
   };
 
+  const [dragId, setDragId] = useState<number | null>(null);
+  const [dragOver, setDragOver] = useState<TaskStatus | null>(null);
+
+  const handleDrop = async (status: TaskStatus) => {
+    if (dragId === null) return;
+    setDragOver(null);
+    const task = tasks.find(t => t.id === dragId);
+    if (!task || task.status === status) return;
+    await changeStatus(dragId, status);
+  };
+
   const getTasksByStatus = (status: TaskStatus) => tasks.filter((t) => t.status === status);
 
   if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
@@ -49,68 +60,66 @@ export default function KanbanPage() {
     <ProjectLayout userRole={userRole}>
       {alert && <Alert message={alert.message} type={alert.type} onClose={hideAlert} />}
 
-      <div className="kanban-container">
-        <div className="kanban-settings">
-          <Link to={`/projects/${projectId}/tasks/new`} className="btn-primary" style={{ fontSize: '0.9rem' }}>
-            + Новая задача
-          </Link>
-        </div>
-
-        <div className="kanban-board-wrapper">
-          <div className="kanban-board">
-            {COLUMNS.map(({ status, label }) => {
-              const columnTasks = getTasksByStatus(status);
-              return (
-                <div key={status} className="kanban-column" data-status={status}>
-                  <h3 className="column-header">
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <StatusDot status={status} />
-                      {label}
-                    </span>
-                    <span className="status-count">{columnTasks.length}</span>
-                  </h3>
-
-                  <div className="column-content" data-status={status}>
-                    {columnTasks.map((task) => (
-                      <div key={task.id} className="kanban-task-card">
-                        <h4>{task.title}</h4>
-                        <div className="task-description-kanban">{task.description}</div>
-                        <div className="task-meta-kanban">
-                          <span className={`task-priority ${task.priority}`}>{task.priority}</span>
-                          <span className="task-due-date">{task.endDate}</span>
-                          {task.assignee && (
-                            <span className="task-assignee">
-                              <UserAvatar username={task.assignee.username} avatarUrl={task.assignee.avatarUrl} />
-                              <span>{task.assignee.username}</span>
-                            </span>
-                          )}
-                        </div>
-                        <div className="task-card-footer">
-                          <Link
-                            to={`/projects/${projectId}/tasks/${task.id}`}
-                            className="task-card-btn"
-                          >
-                            Перейти →
-                          </Link>
-                          <select
-                            style={{ fontSize: '0.75rem', padding: '0.25rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}
-                            value={task.status}
-                            onChange={(e) => changeStatus(task.id, e.target.value as TaskStatus)}
-                          >
-                            {COLUMNS.map((c) => (
-                              <option key={c.status} value={c.status}>{c.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      <div className="kanban-page-wrapper">
+      <div className="kanban-settings">
+        <Link to={`/projects/${projectId}/tasks/new`} className="btn-primary">
+          + Новая задача
+        </Link>
       </div>
+
+      <div className="kanban-scroll">
+        {COLUMNS.map(({ status, label }) => {
+          const columnTasks = getTasksByStatus(status);
+          return (
+            <div key={status} className="kanban-column">
+              <h3 className="column-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <StatusDot status={status} />
+                  {label}
+                </span>
+                <span className="status-count">{columnTasks.length}</span>
+              </h3>
+
+              <div
+                className={`column-content${dragOver === status ? ' drag-over' : ''}`}
+                onDragOver={e => { e.preventDefault(); setDragOver(status); }}
+                onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(null); }}
+                onDrop={() => handleDrop(status)}
+              >
+                {columnTasks.map(task => (
+                  <div
+                    key={task.id}
+                    className={`kanban-task-card${dragId === task.id ? ' dragging' : ''}`}
+                    draggable
+                    onDragStart={() => setDragId(task.id)}
+                    onDragEnd={() => setDragId(null)}
+                  >
+                    <h4>{task.title}</h4>
+                    {task.description && (
+                      <div className="task-description-kanban">{task.description}</div>
+                    )}
+                    <div className="task-meta-kanban">
+                      <span className={`task-priority ${task.priority}`}>{task.priority}</span>
+                      {task.endDate && (
+                        <span className="task-due-date">{task.endDate}</span>
+                      )}
+                      {task.assignee && (
+                        <span className="task-assignee">
+                          <UserAvatar username={task.assignee.username} avatarUrl={task.assignee.avatarUrl} />
+                        </span>
+                      )}
+                    </div>
+                      <Link to={`/projects/${projectId}/tasks/${task.id}`} className="task-card-btn">
+                        Открыть →
+                      </Link>
+                    </div>                  
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
     </ProjectLayout>
   );
 }

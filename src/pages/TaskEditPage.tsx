@@ -98,7 +98,7 @@ export default function TaskEditPage() {
       showAlert('Задача обновлена', 'success');
       setTimeout(() => navigate(`/projects/${projectId}/tasks/${taskId}`), 800);
     } catch (err: any) {
-      setErrors(err.response?.data || { general: 'Ошибка сохранения' });
+      showAlert(err.response?.data?.message || 'Нет прав для изменения', 'error');
     } finally {
       setSaving(false);
     }

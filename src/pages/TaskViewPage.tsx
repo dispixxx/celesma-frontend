@@ -106,8 +106,8 @@ export default function TaskViewPage() {
     try {
       await tasksApi.delete(Number(taskId));
       navigate(`/projects/${projectId}/tasks`);
-    } catch {
-      showAlert('Ошибка удаления', 'error');
+    } catch (err: any) {
+      showAlert(err.response?.data?.message || 'Нет прав для удаления', 'error');
     }
   };
 
@@ -242,20 +242,19 @@ export default function TaskViewPage() {
         <div className="comments-section">
           <h3>Комментарии</h3>
 
-          {!isSending && (
-            <form className="comment-form" onSubmit={handleCommentSubmit}>
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Напишите комментарий..."
-                required
-                rows={3}
-              />
-              <button type="submit" className="btn-action" disabled={!commentText.trim()}>
-                Отправить
-              </button>
-            </form>
-          )}
+          <form className="comment-form" onSubmit={handleCommentSubmit}>
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Напишите комментарий..."
+              required
+              rows={3}
+              disabled={isSending}
+            />
+            <button type="submit" className="btn-action" disabled={!commentText.trim() || isSending}>
+              {isSending ? 'Отправка...' : 'Отправить'}
+            </button>
+          </form>
 
           <div className="comments-list-container">
             <div className="comments-list">
@@ -275,7 +274,7 @@ export default function TaskViewPage() {
                         <Link to={`/profile/${c.author.username}`} style={{ fontWeight: 600, color: 'var(--text)', textDecoration: 'none' }}>
                           {c.author.username}
                         </Link>
-                        <span className="comment-date">{new Date(c.createdAt).toLocaleString('ru-RU')}</span>
+                        <span className="comment-date">{c.createdAt}</span>
                       </div>
                       <p className="comment-text">{c.text}</p>
                     </div>

@@ -433,7 +433,7 @@ small.error {
   padding: 0.5rem;
 }
 
-.comments-list { display: flex; flex-direction: column-reverse; gap: 1rem; }
+.comments-list { display: flex; flex-direction: column; gap: 1rem; }
 
 .comment-item {
   display: flex;
