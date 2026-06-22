@@ -8,8 +8,10 @@ import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
 import { STATUS_LABELS } from '../components/ui/StatusDot';
 import { useProjectRole } from '../hooks/useProjectRole';
-import { commentsApi } from '../api/comments';
-import type { CommentResponse } from '../types';
+import { useTaskComments } from '../hooks/useTaskComments';
+import { useKanban } from '../hooks/useKanban';
+// import { commentsApi } from '../api/comments';
+// import type { CommentResponse } from '../types';
 
 const STATUSES: TaskStatus[] = ['NEW', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELED'];
 const PRIORITY_COLORS = { LOW: '#22c55e', MEDIUM: '#f97316', HIGH: '#ef4444' };
@@ -23,9 +25,14 @@ export default function TaskViewPage() {
   const [statusPopup, setStatusPopup] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<TaskHistoryResponse[]>([]);
-  const [comments, setComments] = useState<CommentResponse[]>([]);
+  const { changeStatus: wsChangeStatus } = useKanban(Number(projectId));
+
+  // const [comments, setComments] = useState<CommentResponse[]>([]);
+  // const [commentText, setCommentText] = useState('');
+  // const [isSending, setIsSending] = useState(false);
+  const { comments, sendComment, connected } = useTaskComments(Number(taskId));
   const [commentText, setCommentText] = useState('');
-  const [isSending, setIsSending] = useState(false);
+
   const { alert, showAlert, hideAlert } = useAlert();
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -53,38 +60,27 @@ export default function TaskViewPage() {
       .then(setTask)
       .catch(() => showAlert('Ошибка загрузки задачи', 'error'))
       .finally(() => setLoading(false));
-    // Загружаем комментарии
-    commentsApi.getByTask(Number(taskId))
-      .then(setComments)
-      .catch(() => { });
+    // // Загружаем комментарии
+    // commentsApi.getByTask(Number(taskId))
+    //   .then(setComments)
+    //   .catch(() => { });
   }, [taskId]);
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
+  const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim() || !taskId) return;
-    setIsSending(true);
-    try {
-      const newComment = await commentsApi.create(Number(taskId), commentText);
-      setComments((prev) => [newComment, ...prev]);
-      setCommentText('');
-    } catch {
-      showAlert('Ошибка отправки комментария', 'error');
-    } finally {
-      setIsSending(false);
-    }
+    if (!commentText.trim()) return;
+    sendComment(commentText);
+    setCommentText(''); // очищаем сразу — сервер пришлёт обратно через подписку
   };
 
-  const changeStatus = async (status: TaskStatus) => {
-    if (!task) return;
-    try {
-      const updated = await tasksApi.changeStatus(task.id, status);
-      setTask(updated);
-      setStatusPopup(false);
-      showAlert(`Статус изменён на ${STATUS_LABELS[status]}`, 'success');
-    } catch (err: any) {
-      showAlert(err.response?.data?.message || 'Нет прав для изменения статуса', 'error');
-    }
-  };
+
+const { changeStatus } = useKanban(
+  Number(projectId),
+  (updated) => {
+    if (updated.id === Number(taskId)) setTask(updated);
+  }
+);
+
 
   const loadHistory = async () => {
     if (!taskId) return;
@@ -136,7 +132,7 @@ export default function TaskViewPage() {
                   <button
                     key={s}
                     className={task.status === s ? 'current' : ''}
-                    onClick={() => changeStatus(s)}
+                    onClick={() => changeStatus(task.id, s)}
                   >
                     <StatusDot status={s} />
                     <span>{STATUS_LABELS[s]}</span>
@@ -249,10 +245,14 @@ export default function TaskViewPage() {
               placeholder="Напишите комментарий..."
               required
               rows={3}
-              disabled={isSending}
+              // disabled={isSending}
             />
-            <button type="submit" className="btn-action" disabled={!commentText.trim() || isSending}>
-              {isSending ? 'Отправка...' : 'Отправить'}
+            <button 
+              type="submit" 
+              className="btn-action" 
+              disabled={!commentText.trim() || !connected}
+            >
+              {connected ? 'Отправить' : 'Подключение...'}
             </button>
           </form>
 

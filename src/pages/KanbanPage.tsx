@@ -7,6 +7,7 @@ import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
 import { useProjectRole } from '../hooks/useProjectRole';
+import { useKanban } from '../hooks/useKanban';
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'NEW',         label: 'To Do' },
@@ -20,26 +21,28 @@ const COLUMNS: { status: TaskStatus; label: string }[] = [
 export default function KanbanPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const userRole = useProjectRole(projectId);
-  const [tasks, setTasks] = useState<TaskResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [tasks, setTasks] = useState<TaskResponse[]>([]);
+  // const [loading, setLoading] = useState(true);
+  const { tasks, changeStatus, connected } = useKanban(Number(projectId));
   const { alert, showAlert, hideAlert } = useAlert();
+  
 
-  useEffect(() => {
-    if (!projectId) return;
-    tasksApi.getByProject(Number(projectId))
-      .then(setTasks)
-      .catch(() => showAlert('Ошибка загрузки задач', 'error'))
-      .finally(() => setLoading(false));
-  }, [projectId]);
+  // useEffect(() => {
+  //   if (!projectId) return;
+  //   tasksApi.getByProject(Number(projectId))
+  //     .then(setTasks)
+  //     .catch(() => showAlert('Ошибка загрузки задач', 'error'))
+  //     .finally(() => setLoading(false));
+  // }, [projectId]);
 
-  const changeStatus = async (taskId: number, status: TaskStatus) => {
-    try {
-      const updated = await tasksApi.changeStatus(taskId, status);
-      setTasks((prev) => prev.map((t) => t.id === taskId ? updated : t));
-    } catch (err: any) {
-      showAlert(err.response?.data?.message || 'Нет прав для изменения статуса', 'error');
-    }
-  };
+  // const changeStatus = async (taskId: number, status: TaskStatus) => {
+  //   try {
+  //     const updated = await tasksApi.changeStatus(taskId, status);
+  //     setTasks((prev) => prev.map((t) => t.id === taskId ? updated : t));
+  //   } catch (err: any) {
+  //     showAlert(err.response?.data?.message || 'Нет прав для изменения статуса', 'error');
+  //   }
+  // };
 
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<TaskStatus | null>(null);
@@ -49,12 +52,12 @@ export default function KanbanPage() {
     setDragOver(null);
     const task = tasks.find(t => t.id === dragId);
     if (!task || task.status === status) return;
-    await changeStatus(dragId, status);
+    changeStatus(dragId, status);
   };
 
   const getTasksByStatus = (status: TaskStatus) => tasks.filter((t) => t.status === status);
 
-  if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
+  if (false) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
 
   return (
     <ProjectLayout userRole={userRole}>
