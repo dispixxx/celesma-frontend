@@ -96,7 +96,7 @@
 }
 
 .auth-logo::before { 
-  content: "🌌"; 
+  content: ""; 
   font-size: 1.8rem;
   animation: float-emoji 3s ease-in-out infinite;
 }

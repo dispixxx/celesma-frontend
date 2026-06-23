@@ -22,7 +22,7 @@ export default function Navbar() {
   return (
     <nav className="top-nav">
       <Link to="/home" className="top-nav__logo">
-        🌌 Celesma
+        Celesma
       </Link>
 
       <div className="top-nav__menu">

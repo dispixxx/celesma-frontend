@@ -231,3 +231,37 @@ label {
   .col-side { min-width: auto; max-width: none; }
   .btn-danger { width: 100%; justify-content: center; }
 }
+
+/* === УНИВЕРСАЛЬНЫЙ СКРОЛЛБАР === */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 8px;   /* Вертикальный скролл */
+  height: 8px;  /* Горизонтальный скролл */
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 4px;
+  border: 2px solid transparent; /* Отступ от края трека */
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
-import type { ProjectResponseDto, ApplicantResponseDto, ProjectRole } from '../types';
+import type { ProjectResponseDto, ApplicantResponseDto, ProjectRole, MemberResponseDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
@@ -13,6 +13,7 @@ export default function ProjectSettingsPage() {
   const navigate = useNavigate();
   const { username } = useAuthStore();
   const [project, setProject] = useState<ProjectResponseDto | null>(null);
+  const [members, setMembers] = useState<MemberResponseDto[]>([]);
   const [applicants, setApplicants] = useState<ApplicantResponseDto[]>([]);
   const [form, setForm] = useState({ name: '', description: '' });
   const [loading, setLoading] = useState(true);
@@ -21,11 +22,13 @@ export default function ProjectSettingsPage() {
   const loadData = async () => {
     if (!projectId) return;
     try {
-      const [proj, apps] = await Promise.all([
+      const [proj,members, apps] = await Promise.all([
         projectsApi.getById(Number(projectId)),
+        projectsApi.getMembers(Number(projectId)).catch(() => []), 
         projectsApi.getApplicants(Number(projectId)),
       ]);
       setProject(proj);
+      setMembers(members);
       setApplicants(apps);
       setForm({ name: proj.name, description: proj.description });
     } catch {
@@ -246,7 +249,7 @@ export default function ProjectSettingsPage() {
               Всего: {memberCount}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {project.members.map((m) => (
+              {members.map((m) => (
                 <div key={m.memberId} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 

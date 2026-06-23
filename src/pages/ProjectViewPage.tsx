@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
 import { tasksApi } from '../api/tasks';
-import type { ProjectResponseDto, TaskStatus, ApplicantResponseDto } from '../types';
+import type { ProjectResponseDto, TaskStatus, ApplicantResponseDto, MemberResponseDto } from '../types';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
@@ -19,7 +19,9 @@ export default function ProjectViewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { username } = useAuthStore();
+
   const [project, setProject] = useState<ProjectResponseDto | null>(null);
+  const [members, setMembers] = useState<MemberResponseDto[]>([]); 
   const [applicants, setApplicants] = useState<ApplicantResponseDto[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -30,10 +32,12 @@ export default function ProjectViewPage() {
     if (!projectId) return;
     Promise.all([
       projectsApi.getById(Number(projectId)),
+      projectsApi.getMembers(Number(projectId)).catch(() => []), 
       tasksApi.getByProject(Number(projectId)).catch(() => []),
       projectsApi.getApplicants(Number(projectId)).catch(() => []),
-    ]).then(([proj, tasks, apps]) => {
+    ]).then(([proj, members, tasks, apps]) => {
       setProject(proj);
+      setMembers(members);
       setApplicants(apps);
       const counts: Record<string, number> = {};
       tasks.forEach((t: any) => { counts[t.status] = (counts[t.status] || 0) + 1; });
@@ -193,7 +197,7 @@ export default function ProjectViewPage() {
                 Всего: {memberCount}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {project.members.map((m) => (
+                {members.map((m) => (
                   <Link
                     key={m.memberId}
                     to={`/profile/${m.user.username}`}

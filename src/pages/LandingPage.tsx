@@ -4,7 +4,7 @@ export default function LandingPage() {
   return (
     <div className="welcome-page">
       <div className="welcome-container">
-        <div className="welcome-logo">🌌 Celesma</div>
+        <div className="welcome-logo">Celesma</div>
         <h1 className="welcome-title">Управляй проектами</h1>
         <p className="welcome-text">
           Канбан, роадмап, чат и задачи — всё в одном месте
