@@ -1,5 +1,5 @@
 import api from './client';
-import type { ApplicantResponseDto, ProjectRequest, ProjectResponseDto } from '../types';
+import type { ApplicantResponseDto, ProjectPreviewResponse, ProjectRequest, ProjectResponseDto } from '../types';
 
 export const projectsApi = {
   getAll: () =>
@@ -19,6 +19,12 @@ export const projectsApi = {
 
   search: (query: string) =>
     api.get<ProjectResponseDto[]>(`/projects/search?q=${encodeURIComponent(query)}`).then((r) => r.data),
+
+  getMyApplications: () =>
+  api.get<ProjectPreviewResponse[]>('/projects/my-applications').then((r) => r.data),
+
+  transferOwnership: (projectId: number, memberId: number) =>
+  api.post(`/projects/${projectId}/members/${memberId}/transfer-ownership`),
 
   // Applicants
   join: (id: number) =>
@@ -45,4 +51,7 @@ export const projectsApi = {
 
   removeMember: (projectId: number, memberId: number) =>
     api.delete(`/projects/${projectId}/members/${memberId}`),
+
+  exitProject: (projectId: number, memberId: number) =>
+    api.post(`/projects/${projectId}/members/${memberId}/exit`),
 };

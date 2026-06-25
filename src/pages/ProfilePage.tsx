@@ -4,6 +4,8 @@ import api from '../api/client';
 import MainLayout from '../components/layout/MainLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import { useAuthStore } from '../store/authStore';
+import AvatarCropModal from '../components/profile/AvatarCropModal';
+
 
 interface UserProfile {
   id: number;
@@ -22,9 +24,11 @@ export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [cropOpen, setCropOpen] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', bio: '' });
   const { alert, showAlert, hideAlert } = useAlert();
   const isOwnProfile = currentUsername && currentUsername === username;
+
 
   useEffect(() => {
     api.get(`/users/${username}`)
@@ -39,7 +43,7 @@ export default function ProfilePage() {
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const r = await api.put(`/users/profile`, form);
+      const r = await api.put('/users/profile', form);
       setUser(r.data);
       setEditOpen(false);
       showAlert('Профиль обновлён', 'success');
@@ -48,6 +52,27 @@ export default function ProfilePage() {
     }
   };
 
+  const uploadAvatar = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('file', blob, 'avatar.jpg');
+    try {
+      const r = await api.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const freshUrl = r.data.avatarUrl ? `${r.data.avatarUrl}?t=${Date.now()}` : null;
+
+      setUser({ ...r.data, avatarUrl: freshUrl });
+      setAvatarUrl(freshUrl);  // ← обновляет навбар мгновенно
+      setCropOpen(false);
+      showAlert('Фото обновлено', 'success');
+    } catch (e: any) {
+      const msg = e.response?.data || 'Ошибка загрузки';
+      showAlert(msg, 'error');
+    }
+  };
+
+  const setAvatarUrl = useAuthStore((state) => state.setAvatarUrl);
   const initials = user?.username ? user.username.slice(0, 2).toUpperCase() : '?';
 
   if (loading) return <MainLayout><div className="empty-state"><p>Загрузка...</p></div></MainLayout>;
@@ -59,15 +84,24 @@ export default function ProfilePage() {
 
       <div className="profile-container">
         <div className="profile-header">
-          <div className="profile-avatar-container">
-            <div className="water-ring" />
-            <div className="avatar-pulse-ring" />
+
+          {/* Аватар — кликабельный только для своего профиля */}
+          <div
+            className="profile-avatar-container"
+            onClick={() => isOwnProfile && setCropOpen(true)}
+            style={isOwnProfile ? { cursor: 'pointer' } : undefined}
+          >
             <div className="profile-avatar">
               {user.avatarUrl
                 ? <img src={user.avatarUrl} alt={user.username} />
                 : <span>{initials}</span>
               }
             </div>
+            {isOwnProfile && (
+              <div className="avatar-edit-hint">
+                <span className="material-icons">photo_camera</span>
+              </div>
+            )}
           </div>
 
           <h1 className="profile-name">@{user.username}</h1>
@@ -78,8 +112,8 @@ export default function ProfilePage() {
 
           <div className="profile-actions">
             {isOwnProfile && (
-              <button className="btn-primary" onClick={() => setEditOpen(true)}>
-                <span className="material-icons">edit</span>
+              <button className="btn-edit-profile" onClick={() => setEditOpen(true)}>
+                <span className="material-icons" style={{ fontSize: '16px' }}>edit</span>
                 Редактировать
               </button>
             )}
@@ -100,6 +134,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Модалка редактирования профиля */}
       {isOwnProfile && editOpen && (
         <div className="profile-modal" onClick={(e) => { if (e.target === e.currentTarget) setEditOpen(false); }}>
           <div className="profile-modal-content">
@@ -107,15 +142,26 @@ export default function ProfilePage() {
             <form onSubmit={saveProfile}>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label>Имя</label>
-                <input type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+                <input
+                  type="text"
+                  value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                />
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label>Фамилия</label>
-                <input type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+                <input
+                  type="text"
+                  value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                />
               </div>
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label>О себе</label>
-                <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                <textarea
+                  value={form.bio}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                />
               </div>
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={() => setEditOpen(false)}>Отмена</button>
@@ -124,6 +170,14 @@ export default function ProfilePage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Модалка кроппера аватара */}
+      {isOwnProfile && cropOpen && (
+        <AvatarCropModal
+          onClose={() => setCropOpen(false)}
+          onSave={uploadAvatar}
+        />
       )}
     </MainLayout>
   );

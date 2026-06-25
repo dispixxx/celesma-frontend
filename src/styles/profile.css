@@ -33,6 +33,7 @@
   position: relative;
   display: inline-block;
   margin-bottom: 1rem;
+  --comet-duration: 4s;
 }
 
 /* Голографическая радужная обводка */
@@ -55,38 +56,78 @@
 }
 
 /* Анимированная радужная обводка */
-.profile-avatar::before {
+.profile-avatar-container::before {
   content: '';
   position: absolute;
-  inset: -3px;
+  top: 50%;
+  left: 50%;
+  width: 196px;
+  height: 196px;
+  margin: -98px 0 0 -98px;
   border-radius: 50%;
   background: conic-gradient(
-    from 0deg,
-    #667eea 0deg,
-    #764ba2 60deg,
-    #f093fb 120deg,
-    #4facfe 180deg,
-    #00f2fe 240deg,
-    #667eea 300deg,
-    #667eea 360deg
+    transparent 0deg,
+    transparent 200deg,
+    rgba(102, 126, 234, 0.3) 260deg,
+    #a78bfa 300deg,
+    #f0abfc 325deg,
+    #fff    338deg,
+    transparent 360deg
   );
-  animation: rotate-gradient 4s linear infinite;
-  z-index: -1;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+  animation: comet-spin 4s linear infinite;
+  opacity: 0.4;
+  /* transition только для opacity — не для animation */
+  transition: opacity 0.4s ease, background 0.4s ease;
+  z-index: 9;
+  pointer-events: none;
 }
 
-/* Внутренний круг для маскировки */
-.profile-avatar::after {
+.profile-avatar-container::after {
   content: '';
   position: absolute;
-  inset: 2px;
-  background: var(--bg-alt);
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  margin: -90px 0 0 -90px;
   border-radius: 50%;
-  z-index: -1;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
 }
 
-@keyframes rotate-gradient {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes comet-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* При hover — ТОЛЬКО меняем opacity и яркость, duration не трогаем */
+.profile-avatar-container:hover::before {
+  opacity: 1;
+  background: conic-gradient(
+    transparent 0deg,
+    transparent 200deg,
+    rgba(102, 126, 234, 0.5) 260deg,
+    #a78bfa 300deg,
+    #f0abfc 325deg,
+    #fff    338deg,
+    transparent 360deg
+  );
+}
+
+.profile-avatar-container:hover::after {
+  opacity: 1;
+}
+
+.profile-avatar-container:hover .profile-avatar {
+  box-shadow:
+    0 0 0 2px rgba(102, 126, 234, 0.5),
+    0 0 25px rgba(102, 126, 234, 0.3);
+  transition: box-shadow 0.3s ease;
 }
 
 .profile-avatar img {
@@ -101,61 +142,6 @@
   font-size: 48px;
 }
 
-/* Плавающие частицы вокруг аватара */
-.avatar-pulse-ring {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 140px; height: 140px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
-  animation: pulse-ring 3s ease-in-out infinite;
-  z-index: 1;
-}
-
-/* Морфинг обводка */
-.water-ring {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 220px; height: 220px;
-  border-radius: 30% 70% 70% 30%/30% 30% 70% 70%;
-  background: linear-gradient(45deg, 
-    rgba(102, 126, 234, 0.15),
-    rgba(118, 75, 162, 0.15),
-    rgba(240, 147, 251, 0.15)
-  );
-  animation: water-ring-anim 8s ease-in-out infinite;
-  z-index: 1;
-  filter: blur(2px);
-}
-
-/* Дополнительные световые блики */
-.profile-avatar-container::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.4), transparent);
-  border-radius: 50%;
-  animation: float-particle 6s ease-in-out infinite;
-  z-index: 0;
-}
-
-.profile-avatar-container::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(240, 147, 251, 0.3), transparent);
-  border-radius: 50%;
-  animation: float-particle 8s ease-in-out infinite reverse;
-  z-index: 0;
-}
 
 @keyframes float-particle {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
@@ -164,62 +150,67 @@
   75% { transform: translate(-15px, -10px) scale(1.05); opacity: 0.7; }
 }
 
-@keyframes water-ring-anim {
-  0%   { 
-    border-radius: 30% 70% 70% 30%/30% 30% 70% 70%; 
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  25%  { 
-    border-radius: 58% 42% 75% 25%/76% 46% 54% 24%; 
-    transform: translate(-50%, -50%) rotate(90deg) scale(1.05);
-  }
-  50%  { 
-    border-radius: 50% 50% 33% 67%/55% 27% 73% 45%; 
-    transform: translate(-50%, -50%) rotate(180deg) scale(0.95);
-  }
-  75%  { 
-    border-radius: 33% 67% 58% 42%/63% 68% 32% 37%; 
-    transform: translate(-50%, -50%) rotate(270deg) scale(1.02);
-  }
-  100% { 
-    border-radius: 30% 70% 70% 30%/30% 30% 70% 70%; 
-    transform: translate(-50%, -50%) rotate(360deg) scale(1);
-  }
+
+/* Кнопка Редактировать — border-sweep анимация */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes pulse-ring {
-  0%   { 
-    transform: translate(-50%, -50%) scale(0.85); 
-    opacity: 0.3; 
-  }
-  50%  { 
-    transform: translate(-50%, -50%) scale(1.15);   
-    opacity: 0.6; 
-  }
-  100% { 
-    transform: translate(-50%, -50%) scale(0.85); 
-    opacity: 0.3; 
-  }
+.btn-edit-profile {
+  position: relative;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s ease;
+  overflow: hidden;
 }
 
-/* 3D эффект при наведении */
-.profile-avatar-container:hover .profile-avatar {
-  transform: scale(1.1) translateZ(20px);
-  box-shadow: 
-    0 0 40px rgba(102, 126, 234, 0.6),
-    0 0 80px rgba(102, 126, 234, 0.4),
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    inset 0 0 30px rgba(102, 126, 234, 0.2);
+/* Бегущий border через pseudo-элементы */
+.btn-edit-profile::before,
+.btn-edit-profile::after {
+  content: '';
+  position: absolute;
+  border-radius: 0.5rem;
+  inset: 0;
+  pointer-events: none;
 }
 
-.profile-avatar-container:hover .water-ring {
-  animation-duration: 4s;
-  filter: blur(1px);
-  opacity: 0.8;
+/* Верх + низ */
+.btn-edit-profile::before {
+  border-top: 2px solid var(--primary, #667eea);
+  border-bottom: 2px solid var(--primary, #667eea);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  
 }
 
-.profile-avatar-container:hover .avatar-pulse-ring {
-  animation-duration: 1.5s;
+/* Лево + право */
+.btn-edit-profile::after {
+  border-left: 2px solid var(--primary, #667eea);
+  border-right: 2px solid var(--primary, #667eea);
+  transform: scaleY(0);
+  transition: transform 0.3s ease 0.3s;
+}
+
+.btn-edit-profile:hover::before {
+  transform: scaleX(1);
+}
+
+.btn-edit-profile:hover::after {
+  transform: scaleY(1);
+}
+
+.btn-edit-profile:hover {
+  color: var(--primary, #667eea);
 }
 
 .profile-name { 
@@ -537,7 +528,91 @@
 @media (max-width: 768px) {
   .profile-container { padding: 2rem 1rem; }
   .profile-avatar { width: 140px; height: 140px; }
-  .water-ring { width: 160px; height: 160px; }
   .profile-actions { flex-direction: column; width: 100%; max-width: 320px; }
   .profile-details, .stats-section { padding: 1.5rem; }
 }
+
+.avatar-crop-modal {
+  max-width: 560px !important;
+  width: 90vw !important;
+}
+
+.crop-container {
+  position: relative;
+  height: 380px;
+  background: #111;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.zoom-control input[type="range"] {
+  flex: 1;
+}
+
+.avatar-upload-zone {
+  height: 200px;
+  border: 2px dashed var(--border);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.avatar-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.avatar-upload-label:hover {
+  color: var(--primary);
+}
+
+/* Иконка камеры поверх аватара при hover */
+.avatar-edit-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 12;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+.avatar-edit-hint .material-icons {
+  font-size: 16px;
+}
+
+.avatar-edit-hint::after {
+  content: 'Изменить фото';
+}
+
+.profile-avatar-container:hover .avatar-edit-hint {
+  opacity: 1;
+}
+

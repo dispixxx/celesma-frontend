@@ -21,7 +21,7 @@ export default function ProjectViewPage() {
   const { username } = useAuthStore();
 
   const [project, setProject] = useState<ProjectResponseDto | null>(null);
-  const [members, setMembers] = useState<MemberResponseDto[]>([]); 
+  const [members, setMembers] = useState<MemberResponseDto[]>([]);
   const [applicants, setApplicants] = useState<ApplicantResponseDto[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function ProjectViewPage() {
     if (!projectId) return;
     Promise.all([
       projectsApi.getById(Number(projectId)),
-      projectsApi.getMembers(Number(projectId)).catch(() => []), 
+      projectsApi.getMembers(Number(projectId)).catch(() => []),
       tasksApi.getByProject(Number(projectId)).catch(() => []),
       projectsApi.getApplicants(Number(projectId)).catch(() => []),
     ]).then(([proj, members, tasks, apps]) => {
@@ -81,6 +81,21 @@ export default function ProjectViewPage() {
       showAlert(err.response?.data?.message || 'Ошибка', 'error');
     } finally {
       setJoinLoading(false);
+    }
+  };
+
+  const handleExit = async () => {
+    if (!project || !username) return;
+    const me = members.find((m) => m.user.username === username);
+    if (!me) return;
+
+    if (!confirm('Вы уверены, что хотите покинуть проект?')) return;
+
+    try {
+      await projectsApi.exitProject(Number(projectId), me.memberId);
+      navigate('/home', { state: { message: 'Вы покинули проект' } });
+    } catch (err: any) {
+      showAlert(err.response?.data?.message || 'Ошибка при выходе из проекта', 'error');
     }
   };
 
@@ -173,8 +188,8 @@ export default function ProjectViewPage() {
                 </p>
                 <div className="status-grid">
                   {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((st) => (
-                    <div 
-                      key={st} 
+                    <div
+                      key={st}
                       className={`status-card ${st}`}
                       onClick={() => navigate(`/projects/${projectId}/tasks?status=${st}`)}
                       style={{ cursor: 'pointer' }}
@@ -184,8 +199,18 @@ export default function ProjectViewPage() {
                     </div>
                   ))}
                 </div>
+                {isMember && currentUserRole !== 'OWNER' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <button className="btn-exit" onClick={handleExit}>
+                      <span className="material-icons" style={{ fontSize: '1.1rem' }}>logout</span>
+                      Покинуть проект
+                    </button>
+                  </div>
+                )}
               </section>
-            )}
+
+            )
+            }
           </div>
         </section>
 
@@ -201,9 +226,9 @@ export default function ProjectViewPage() {
                   <Link
                     key={m.memberId}
                     to={`/profile/${m.user.username}`}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: '0.5rem',
                       textDecoration: 'none',
                       color: 'inherit',

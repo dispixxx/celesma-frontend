@@ -59,6 +59,12 @@ export interface ProjectResponseDto {
   members: MemberResponseDto[];
 }
 
+export interface ProjectPreviewResponse {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface ApplicantResponseDto {
   projectId: number;
   user: UserResponseDto;

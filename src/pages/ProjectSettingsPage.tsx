@@ -22,9 +22,9 @@ export default function ProjectSettingsPage() {
   const loadData = async () => {
     if (!projectId) return;
     try {
-      const [proj,members, apps] = await Promise.all([
+      const [proj, members, apps] = await Promise.all([
         projectsApi.getById(Number(projectId)),
-        projectsApi.getMembers(Number(projectId)).catch(() => []), 
+        projectsApi.getMembers(Number(projectId)).catch(() => []),
         projectsApi.getApplicants(Number(projectId)),
       ]);
       setProject(proj);
@@ -119,6 +119,16 @@ export default function ProjectSettingsPage() {
   const isAdmin = currentUserRole === 'ADMIN';
   const isModerator = currentUserRole === 'MODERATOR';
   const memberCount = getMemberCount(project);
+  const handleTransferOwnership = async (memberId: number, targetUsername: string) => {
+  if (!confirm(`Передать владение проектом пользователю ${targetUsername}? Вы станете ADMIN.`)) return;
+  try {
+    await projectsApi.transferOwnership(Number(projectId), memberId);
+    showAlert('Владение передано', 'success');
+    loadData();
+  } catch (err: any) {
+    showAlert(err.response?.data?.message || 'Ошибка передачи владения', 'error');
+  }
+};
 
   return (
     <ProjectLayout isMember={isMember} userRole={currentUserRole}>
@@ -187,7 +197,7 @@ export default function ProjectSettingsPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {applicants.map((applicant) => (
                       <div key={applicant.user.id} className="request-row">
-                        <Link 
+                        <Link
                           to={`/profile/${applicant.user.username}`}
                           style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}
                         >
@@ -249,77 +259,111 @@ export default function ProjectSettingsPage() {
               Всего: {memberCount}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {members.map((m) => (
-                <div key={m.memberId} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  padding: '0.5rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg)'
-                }}>
-                  <Link 
-                    to={`/profile/${m.user.username}`}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}
-                  >
-                    <UserAvatar username={m.user.username} avatarUrl={m.user.avatarUrl} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {m.user.username}
-                      </div>
-                      {m.joinedAt && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          с {m.joinedAt}
+              {members.map((m) => {
+                const memberIsOwner = m.role === 'OWNER';
+                return (
+                  <div key={m.memberId} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg)'
+                  }}>
+                    <Link
+                      to={`/profile/${m.user.username}`}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}
+                    >
+                      <UserAvatar username={m.user.username} avatarUrl={m.user.avatarUrl} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {m.user.username}
                         </div>
+                        {m.joinedAt && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            с {m.joinedAt}
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexShrink: 0 }}>
+                      {/* Смена роли — только не-владельцам, только если есть права */}
+                      {(isOwner || isAdmin || isModerator) && !memberIsOwner ? (
+                        <select
+                          value={m.role}
+                          onChange={(e) => handleRoleChange(m.memberId, e.target.value as ProjectRole)}
+                          style={{
+                            padding: '0.2rem 0.4rem',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            borderRadius: '6px',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-alt)',
+                            color: 'var(--text)',
+                            cursor: 'pointer',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4px',
+                          }}
+                        >
+                          <option value="MEMBER">MEMBER</option>
+                          <option value="MODERATOR">MODERATOR</option>
+                          {(isOwner || isAdmin) && <option value="ADMIN">ADMIN</option>}
+                        </select>
+                      ) : (
+                        <span className={`project-role role-${m.role}`}>{m.role}</span>
+                      )}
+
+                      {/* Передать владение — только OWNER, только не себе */}
+                      {isOwner && !memberIsOwner && (
+                        <button
+                          onClick={() => handleTransferOwnership(m.memberId, m.user.username)}
+                          title="Передать владение"
+                          style={{
+                            padding: '0.2rem',
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--warning, #f59e0b)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            borderRadius: '4px',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(245,158,11,0.1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span className="material-icons" style={{ fontSize: '1.1rem' }}>workspace_premium</span>
+                        </button>
+                      )}
+
+                      {/* Удалить из проекта */}
+                      {(isOwner || isAdmin || isModerator) && !memberIsOwner && (
+                        <button
+                          onClick={() => handleRemoveMember(m.memberId, m.user.username)}
+                          title="Удалить из проекта"
+                          style={{
+                            padding: '0.2rem',
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--error)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            borderRadius: '4px',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-light)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span className="material-icons" style={{ fontSize: '1.1rem' }}>person_remove</span>
+                        </button>
                       )}
                     </div>
-                  </Link>
-                  
-                  {(isOwner || isAdmin || isModerator) && !isProjectOwner(project, m.user.username) ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <select
-                        value={m.role}
-                        onChange={(e) => handleRoleChange(m.memberId, e.target.value as ProjectRole)}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          fontSize: '0.75rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg)',
-                          color: 'var(--text)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="MEMBER">MEMBER</option>
-                        <option value="MODERATOR">MODERATOR</option>
-                        {(isOwner || isAdmin) && <option value="ADMIN">ADMIN</option>}
-                      </select>
-                      <button
-                        onClick={() => handleRemoveMember(m.memberId, m.user.username)}
-                        style={{
-                          padding: '0.25rem',
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--error)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          borderRadius: '4px',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--error-light)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                        title="Удалить из проекта"
-                      >
-                        <span className="material-icons" style={{ fontSize: '1.1rem' }}>person_remove</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <span className={`project-role role-${m.role}`}>{m.role}</span>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </aside>

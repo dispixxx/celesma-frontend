@@ -28,8 +28,8 @@ export default function TaskEditPage() {
 
   useEffect(() => {
     if (!projectId) return;
-    projectsApi.getById(Number(projectId))
-      .then((p) => setMembers(p.members))
+    projectsApi.getMembers(Number(projectId))
+      .then((members) => setMembers(members))
       .catch(() => {});
   }, [projectId]);
 
@@ -126,10 +126,7 @@ export default function TaskEditPage() {
   };
 
   const selectedMember = members.find((m) => m.user.id === form.assigneeId);
-  const filteredMembers = members.filter((m) =>
-    m.user.username.toLowerCase().includes(search.toLowerCase()) ||
-    `${m.user.firstName} ${m.user.lastName}`.toLowerCase().includes(search.toLowerCase())
-  );
+
 
   if (loading) return <ProjectLayout userRole={userRole}><div className="empty-state"><p>Загрузка...</p></div></ProjectLayout>;
 
@@ -347,12 +344,12 @@ export default function TaskEditPage() {
 
               {/* Список */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxHeight: '320px', overflowY: 'auto' }}>
-                {filteredMembers.length === 0 ? (
+                {members.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                     Никого не найдено
                   </div>
                 ) : (
-                  filteredMembers.map((m) => (
+                  members.map((m) => (
                     <div
                       key={m.user.id}
                       onClick={() => { setForm({ ...form, assigneeId: m.user.id }); setModalOpen(false); setSearch(''); }}

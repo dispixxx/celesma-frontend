@@ -12,6 +12,7 @@ interface AuthState {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   loadUserData: () => Promise<void>;
+  setAvatarUrl: (url: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   username: localStorage.getItem('username'),
   avatarUrl: localStorage.getItem('avatarUrl'),
   isAuthenticated: !!localStorage.getItem('token'),
+  
 
   login: async (data) => {
     const response = await authApi.login(data);
@@ -67,5 +69,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (e) {
       console.error('Failed to load user data', e);
     }
+  },
+
+  setAvatarUrl: (url) => {
+    localStorage.setItem('avatarUrl', url || '');
+    set({ avatarUrl: url });
   },
 }));
