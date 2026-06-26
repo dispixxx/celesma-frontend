@@ -76,6 +76,18 @@ export interface ProjectRequest {
   description: string;
 }
 
+// Attachments
+export interface AttachmentResponse {
+  id: number;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  project: ProjectPreviewResponse;
+  uploadedBy: UserResponseDto;
+  createdAt: string;
+}
+
 // Task
 export type TaskStatus = 'NEW' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED' | 'ON_HOLD' | 'CANCELED';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';

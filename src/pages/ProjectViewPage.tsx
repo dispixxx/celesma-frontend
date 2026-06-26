@@ -3,11 +3,13 @@ import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
 import { tasksApi } from '../api/tasks';
 import type { ProjectResponseDto, TaskStatus, ApplicantResponseDto, MemberResponseDto } from '../types';
+import ProjectAttachments from '../components/project/ProjectAttachments';
 import ProjectLayout from '../components/layout/ProjectLayout';
 import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import { useAuthStore } from '../store/authStore';
 import { getCurrentUserRole, isProjectMember, getMemberCount, isApplicant as checkIsApplicant } from '../utils/projectUtils';
+
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
   NEW: 'Новые', IN_PROGRESS: 'В работе', REVIEW: 'Проверка',
@@ -208,11 +210,19 @@ export default function ProjectViewPage() {
                   </div>
                 )}
               </section>
-
             )
             }
           </div>
+          {isMember && (
+            <ProjectAttachments
+              projectId={Number(projectId)}
+              canUpload={isMember}
+              currentUsername={username}
+              isOwner={currentUserRole === 'OWNER'}
+            />
+          )}
         </section>
+
 
         {isMember && (
           <aside className="col-side">
