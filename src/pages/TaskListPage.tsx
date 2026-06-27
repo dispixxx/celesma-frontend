@@ -8,7 +8,8 @@ import Alert, { useAlert } from '../components/ui/Alert';
 import UserAvatar from '../components/ui/UserAvatar';
 import StatusDot from '../components/ui/StatusDot';
 import { useProjectRole } from '../hooks/useProjectRole';
-import { useAuthStore } from '../store/authStore';
+
+import TaskDrawer from '../components/task/TaskDrawer';
 
 import MemberModal from '../components/ui/MemberModal';
 import FilterUserBtn from '../components/ui/FilterUserBtn';
@@ -16,6 +17,7 @@ import FilterUserBtn from '../components/ui/FilterUserBtn';
 const PRIORITY_LABELS = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий' };
 const PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 const STATUSES: TaskStatus[] = ['NEW', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELED'];
+
 
 type ViewMode = 'grid' | 'table';
 type SortField = 'createdAt' | 'endDate' | 'priority' | 'title';
@@ -29,8 +31,9 @@ function isOverdue(endDate: string): boolean {
 export default function TaskListPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
-  const userRole = useProjectRole(projectId);
-  const { username } = useAuthStore();
+  const userRole = useProjectRole(projectId)
+
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
 
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [filtered, setFiltered] = useState<TaskResponse[]>([]);
@@ -115,6 +118,11 @@ export default function TaskListPage() {
     });
   };
 
+  const handleTaskUpdated = (updated: TaskResponse) => {
+    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t));
+    setSelectedTask(updated);
+  };
+
   const hasFilters = !!(search || statusFilter.length > 0 || assigneeFilter || creatorFilter);
 
   const resetFilters = () => {
@@ -123,9 +131,6 @@ export default function TaskListPage() {
     setAssigneeFilter(null);
     setCreatorFilter(null);
   };
-
-
-
 
   return (
     <ProjectLayout userRole={userRole}>
@@ -263,17 +268,16 @@ export default function TaskListPage() {
       ) : viewMode === 'grid' ? (
         <div className="task-grid" style={{ marginTop: '1rem' }}>
           {filtered.map((task) => (
-            <div key={task.id} className="task-card" data-status={task.status}>
+            <div key={task.id} className={`task-card ${selectedTask?.id === task.id ? 'selected' : ''}`} data-status={task.status}>
               <div className="task-card-top">
                 <h3>{task.title}</h3>
                 <button
                   className={`task-favorite-btn ${favorites.has(task.id) ? 'active' : ''}`}
                   onClick={(e) => toggleFavorite(task.id, e)}
-                  title={favorites.has(task.id) ? 'Убрать из избранного' : 'В избранное'}
                 >
-                  <span className="material-icons">
-                    {favorites.has(task.id) ? 'star' : 'star_border'}
-                  </span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill={favorites.has(task.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+                  </svg>
                 </button>
               </div>
               <p className="task-card-desc">{task.description}</p>
@@ -300,8 +304,15 @@ export default function TaskListPage() {
               </div>
               <div className="task-card-footer">
                 <Link to={`/projects/${projectId}/tasks/${task.id}`} className="task-card-btn">
-                  Перейти →
+                  Открыть
                 </Link>
+                <button
+                  className="task-card-icon-btn"
+                  onClick={() => setSelectedTask(task)}
+                  title="Быстрый просмотр"
+                >
+                  <span className="material-icons">vertical_split</span>
+                </button>
               </div>
             </div>
           ))}
@@ -328,15 +339,15 @@ export default function TaskListPage() {
             </thead>
             <tbody>
               {filtered.map((task) => (
-                <tr key={task.id} className="task-table-row" data-status={task.status}>
+                <tr key={task.id} className={`task-table-row ${selectedTask?.id === task.id ? 'selected' : ''}`} data-status={task.status}>
                   <td>
                     <button
                       className={`task-favorite-btn ${favorites.has(task.id) ? 'active' : ''}`}
                       onClick={(e) => toggleFavorite(task.id, e)}
                     >
-                      <span className="material-icons">
-                        {favorites.has(task.id) ? 'star' : 'star_border'}
-                      </span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={favorites.has(task.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+                      </svg>
                     </button>
                   </td>
                   <td className="task-table-title">{task.title}</td>
@@ -367,10 +378,17 @@ export default function TaskListPage() {
                       {task.endDate || '—'}
                     </span>
                   </td>
-                  <td>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Link to={`/projects/${projectId}/tasks/${task.id}`} className="task-card-btn">
                       Открыть
                     </Link>
+                    <button
+                      className="task-card-icon-btn"
+                      onClick={() => setSelectedTask(task)}
+                      title="Быстрый просмотр"
+                    >
+                      <span className="material-icons">vertical_split</span>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -399,6 +417,13 @@ export default function TaskListPage() {
         members={members}              // ← добавить
         memberSearch={memberSearch}    // ← добавить
         setMemberSearch={setMemberSearch}  // ← добавить
+      />
+
+      <TaskDrawer
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        projectId={projectId!}
+        onTaskUpdated={handleTaskUpdated}
       />
     </ProjectLayout>
   );

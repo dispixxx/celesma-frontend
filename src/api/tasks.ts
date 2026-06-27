@@ -21,6 +21,9 @@ export const tasksApi = {
   update: (taskId: number, data: TaskRequest) =>
     api.put<TaskResponse>(`/tasks/${taskId}`, data).then((r) => r.data),
 
+  updateTitle: (taskId: number, title: string): Promise<TaskResponse> =>
+    api.patch<TaskResponse>(`/tasks/${taskId}/title`, { title }).then(r => r.data),
+
   changeStatus: (taskId: number, status: TaskStatus) =>
     api.patch<TaskResponse>(`/tasks/${taskId}/status`, { status }).then((r) => r.data),
 
@@ -32,9 +35,9 @@ export const tasksApi = {
 
   generateTitle: (description: string) =>
     api.post<string>('/tasks/generate-title', { description } as AiTitleRequest)
-       .then((r) => r.data),
+      .then((r) => r.data),
 
   aiProcess: (description: string, action: AiDescriptionAction) =>
     api.post<string>('/tasks/ai-process', { description, action } as AiDescriptionRequest)
-       .then((r) => r.data),
+      .then((r) => r.data),
 };

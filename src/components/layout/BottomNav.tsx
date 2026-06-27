@@ -48,6 +48,7 @@ export default function BottomNav({ isMember = true }: BottomNavProps) {
     { to: `/projects/${projectId}/kanban`,   icon: 'view_kanban', label: 'Канбан',    end: false },
     { to: `/projects/${projectId}/roadmap`,  icon: 'map',         label: 'Роадмап',   end: false },
     { to: `/projects/${projectId}/chat`,     icon: 'chat',        label: 'Чат',       end: false },
+    { to: `/projects/${projectId}/stats`,    icon: 'bar_chart',   label: 'Статистика', end: false },
     { to: `/projects/${projectId}/settings`, icon: 'settings',    label: 'Настройки', end: false },
   ];
 

@@ -272,8 +272,16 @@ export default function TaskViewPage() {
                 <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Напишите комментарий..."
-                  required
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (commentText.trim() && connected) {
+                        sendComment(commentText);
+                        setCommentText('');
+                      }
+                    }
+                  }}
+                  placeholder="Напишите комментарий... (Enter — отправить, Shift+Enter — новая строка)"
                   rows={3}
                 />
                 <button
@@ -305,7 +313,9 @@ export default function TaskViewPage() {
                             </Link>
                             <span className="comment-date">{c.createdAt}</span>
                           </div>
-                          <p className="comment-text">{c.text}</p>
+                          <p className="comment-text" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                            {c.text}
+                          </p>
                         </div>
                       </div>
                     ))

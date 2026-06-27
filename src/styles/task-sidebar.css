@@ -1,0 +1,405 @@
+/* Overlay */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Drawer */
+.task-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--bg-alt);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px 0 0 16px;
+}
+
+.task-drawer.open {
+  transform: translateX(0);
+}
+
+/* Header */
+.task-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.task-drawer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-drawer-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-drawer-status {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.drawer-open-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.drawer-open-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.drawer-open-btn .material-icons {
+  font-size: 14px;
+}
+
+.drawer-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.drawer-close-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.drawer-close-btn .material-icons {
+  font-size: 18px;
+}
+
+/* Body */
+.task-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.task-drawer-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+}
+
+.task-drawer-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.task-drawer-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Meta section — карточка со строками */
+.task-drawer-section {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.task-drawer-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.task-drawer-meta-row:last-child {
+  border-bottom: none;
+}
+
+.task-drawer-meta-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.task-drawer-meta-label .material-icons {
+  font-size: 15px;
+}
+
+.task-drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.task-drawer-empty {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.task-drawer-date {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.task-drawer-date.overdue {
+  color: var(--error);
+}
+
+.task-drawer-date.overdue .material-icons {
+  font-size: 14px;
+}
+
+.task-drawer-priority {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Выделение активной карточки */
+.task-card.selected {
+  position: relative;
+  z-index: 201;
+  overflow: hidden;
+}
+
+/* Цвет outline по статусу */
+.task-card.selected[data-status="NEW"] {
+  box-shadow: 0 0 0 1.5px var(--status-new), 0 0 16px rgba(107, 114, 128, 0.4);
+  outline: none;
+}
+
+.task-card.selected[data-status="IN_PROGRESS"] {
+  box-shadow: 0 0 0 1.5px var(--status-in-progress), 0 0 16px rgba(59, 130, 246, 0.4);
+  outline: none;
+}
+
+.task-card.selected[data-status="REVIEW"] {
+  box-shadow: 0 0 0 1.5px var(--status-review), 0 0 16px rgba(139, 92, 246, 0.4);
+  outline: none;
+}
+
+.task-card.selected[data-status="COMPLETED"] {
+  box-shadow: 0 0 0 1.5px var(--status-completed), 0 0 16px rgba(34, 197, 94, 0.4);
+  outline: none;
+}
+
+.task-card.selected[data-status="ON_HOLD"] {
+  box-shadow: 0 0 0 1.5px var(--status-on-hold), 0 0 16px rgba(249, 115, 22, 0.4);
+  outline: none;
+}
+
+.task-card.selected[data-status="CANCELED"] {
+  box-shadow: 0 0 0 1.5px var(--status-canceled), 0 0 16px rgba(239, 68, 68, 0.4);
+  outline: none;
+}
+
+.task-table-row.selected {
+  --status-color: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--status-color);
+  position: relative;
+  z-index: 201;
+}
+
+.task-table-row.selected[data-status="NEW"] { --status-color: var(--status-new); }
+.task-table-row.selected[data-status="IN_PROGRESS"] { --status-color: var(--status-in-progress); }
+.task-table-row.selected[data-status="REVIEW"] { --status-color: var(--status-review); }
+.task-table-row.selected[data-status="COMPLETED"] { --status-color: var(--status-completed); }
+.task-table-row.selected[data-status="ON_HOLD"] { --status-color: var(--status-on-hold); }
+.task-table-row.selected[data-status="CANCELED"] { --status-color: var(--status-canceled); }
+
+/* Shimmer поверх карточки */
+.task-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(100deg,
+      transparent 0%,
+      transparent 20%,
+      rgba(255, 255, 255, 0.04) 45%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.04) 55%,
+      transparent 80%,
+      transparent 100%);
+  animation: cardShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes cardShimmer {
+  0% {
+    left: -60%;
+  }
+
+  100% {
+    left: 140%;
+  }
+}
+
+.drawer-status-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.drawer-status-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.drawer-status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.drawer-status-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  min-width: 180px;
+  overflow: hidden;
+  animation: dropdownIn 0.15s ease;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.drawer-status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.875rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.drawer-status-option:hover {
+  background: var(--bg);
+}
+
+.drawer-status-option.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.task-card-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.task-card-icon-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.task-card-icon-btn .material-icons {
+  font-size: 18px;
+}

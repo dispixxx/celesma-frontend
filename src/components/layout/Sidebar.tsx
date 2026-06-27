@@ -17,11 +17,12 @@ export default function Sidebar({ isMember = true, userRole }: SidebarProps) {
   const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'MODERATOR';
 
   const links = [
-    { to: `/projects/${projectId}`,         icon: 'home',        label: 'Обзор' },
+    { to: `/projects/${projectId}`,          icon: 'home',        label: 'Обзор' },
     { to: `/projects/${projectId}/tasks`,    icon: 'task',        label: 'Задачи' },
     { to: `/projects/${projectId}/kanban`,   icon: 'view_kanban', label: 'Канбан' },
     { to: `/projects/${projectId}/roadmap`,  icon: 'map',         label: 'Роадмап' },
     { to: `/projects/${projectId}/chat`,     icon: 'chat',        label: 'Чат' },
+    { to: `/projects/${projectId}/stats`,    icon: 'bar_chart',   label: 'Статистика' },
     ...(isAdmin ? [{ to: `/projects/${projectId}/settings`, icon: 'settings', label: 'Настройки' }] : []),
   ];
 

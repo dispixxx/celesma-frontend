@@ -29,13 +29,14 @@
 .kanban-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 .kanban-column {
-  flex: 0 0 270px;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
+  min-width: 180px;
 }
 
 .column-header {
@@ -105,7 +106,6 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -144,4 +144,315 @@
 
 @media (max-width: 768px) {
   .kanban-column { flex: 0 0 250px; }
+}
+
+.kanban-task-card.selected {
+  z-index: 201;
+  position: relative;
+  overflow: hidden;
+}
+.kanban-task-card.selected[data-status="NEW"] {
+  box-shadow: 0 0 0 1.5px var(--status-new), 0 0 16px rgba(107, 114, 128, 0.4);
+}
+.kanban-task-card.selected[data-status="IN_PROGRESS"] {
+  box-shadow: 0 0 0 1.5px var(--status-in-progress), 0 0 16px rgba(59, 130, 246, 0.4);
+}
+.kanban-task-card.selected[data-status="REVIEW"] {
+  box-shadow: 0 0 0 1.5px var(--status-review), 0 0 16px rgba(139, 92, 246, 0.4);
+}
+.kanban-task-card.selected[data-status="COMPLETED"] {
+  box-shadow: 0 0 0 1.5px var(--status-completed), 0 0 16px rgba(34, 197, 94, 0.4);
+}
+.kanban-task-card.selected[data-status="ON_HOLD"] {
+  box-shadow: 0 0 0 1.5px var(--status-on-hold), 0 0 16px rgba(249, 115, 22, 0.4);
+}
+.kanban-task-card.selected[data-status="CANCELED"] {
+  box-shadow: 0 0 0 1.5px var(--status-canceled), 0 0 16px rgba(239, 68, 68, 0.4);
+}
+.kanban-task-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    transparent 20%,
+    rgba(255, 255, 255, 0.04) 45%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.04) 55%,
+    transparent 80%,
+    transparent 100%
+  );
+  animation: cardShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Кнопка + в заголовке колонки */
+.column-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.column-add-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+.column-add-btn .material-icons {
+  font-size: 16px;
+}
+
+/* Пустая колонка */
+.column-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  font-size: 0.8rem;
+  user-select: none;
+}
+.column-empty .material-icons {
+  font-size: 2rem;
+}
+
+/* Приоритет на канбан-карточке */
+.kanban-priority-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Дедлайн на канбан-карточке */
+.kanban-due-date {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.kanban-due-date .material-icons {
+  font-size: 12px;
+}
+.kanban-due-date.overdue {
+  color: var(--status-canceled);
+  font-weight: 500;
+}
+.kanban-due-date.overdue .material-icons {
+  font-size: 12px;
+}
+
+/* Drop placeholder */
+.kanban-drop-placeholder {
+  height: 60px;
+  border: 2px dashed var(--primary);
+  border-radius: 8px;
+  background: var(--primary-light);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* ── Адаптивные колонки (без горизонтального скролла на широких экранах) ── */
+.kanban-scroll {
+  flex-wrap: nowrap;
+}
+
+.kanban-column {
+  flex: 1 1 0;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+/* ── Свёрнутая колонка ── */
+.kanban-column.collapsed {
+  flex: 0 0 44px;
+  min-width: 44px;
+  max-width: 44px;
+  cursor: pointer;
+}
+
+.kanban-column.collapsed .column-header {
+  all: unset;
+}
+
+/* ── WIP-лимит ── */
+.kanban-column.wip-over .column-header {
+  background: color-mix(in srgb, var(--status-canceled) 10%, var(--bg));
+  border-bottom-color: var(--status-canceled);
+}
+
+.kanban-wip-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--status-canceled);
+  background: color-mix(in srgb, var(--status-canceled) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-canceled) 30%, transparent);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.kanban-wip-warning .material-icons {
+  font-size: 16px;
+}
+
+/* ── Фильтры ── */
+.kanban-filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.kanban-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+.kanban-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-secondary);
+}
+
+.kanban-search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  width: 160px;
+}
+
+.kanban-search-box button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  padding: 0;
+}
+
+.kanban-search-box .material-icons { font-size: 16px; }
+
+/* ── Приоритетные чипы ── */
+.kanban-priority-filter {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.kanban-priority-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--chip-color, var(--border));
+  background: transparent;
+  color: var(--chip-color, var(--text-secondary));
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.kanban-priority-chip.active,
+.kanban-priority-chip:hover {
+  background: var(--chip-color);
+  color: #fff;
+}
+
+/* ── Цветная полоска приоритета на карточке ── */
+.kanban-task-card {
+  position: relative;
+  padding-left: 14px; /* отступ для полоски */
+}
+
+.task-priority-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 8px 0 0 8px;
+  background: var(--priority-color, var(--border));
+}
+
+/* ── Inline edit ── */
+.kanban-inline-edit {
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-alt);
+  border: 1.5px solid var(--primary);
+  border-radius: 6px;
+  padding: 3px 6px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.column-collapsed-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding: 12px 0 16px;
+  height: 100%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.column-collapsed-body:hover {
+  background: var(--bg);
+}
+
+.column-collapsed-label {
+  writing-mode: vertical-lr;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  user-select: none;
+  letter-spacing: 0.03em;
+}
+
+css.column-collapsed-body.drag-over-collapsed {
+  background: var(--primary-light);
+  border-radius: 0 0 11px 11px;
+}
+
+.kanban-column.collapsed {
+  transition: background 0.15s;
+}
+
+.kanban-column.drag-over-active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* убрать дублирующую подсветку с column-content когда колонка развёрнута */
+.column-content.drag-over {
+  background: transparent; 
 }

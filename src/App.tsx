@@ -20,6 +20,7 @@ import RoadmapPage from './pages/RoadmapPage';
 import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ProjectStatsPage from './pages/ProjectStatsPage';
 
 export default function App() {
   useTheme();
@@ -51,7 +52,7 @@ export default function App() {
         <Route path="/projects/:projectId/kanban" element={<PrivateRoute><MemberRoute><KanbanPage /></MemberRoute></PrivateRoute>} />
         <Route path="/projects/:projectId/roadmap" element={<PrivateRoute><MemberRoute><RoadmapPage /></MemberRoute></PrivateRoute>} />
         <Route path="/projects/:projectId/chat" element={<PrivateRoute><MemberRoute><ChatPage /></MemberRoute></PrivateRoute>} />
-
+        <Route path="/projects/:projectId/stats" element={<PrivateRoute><MemberRoute><ProjectStatsPage /></MemberRoute></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
