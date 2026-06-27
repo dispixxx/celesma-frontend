@@ -10,8 +10,8 @@ import { STATUS_LABELS } from '../components/ui/StatusDot';
 import { useProjectRole } from '../hooks/useProjectRole';
 import { useTaskComments } from '../hooks/useTaskComments';
 import { useKanban } from '../hooks/useKanban';
-// import { commentsApi } from '../api/comments';
-// import type { CommentResponse } from '../types';
+import TaskAttachments from '../components/task/TaskAttachments';
+import { useAuthStore } from '../store/authStore';
 
 const STATUSES: TaskStatus[] = ['NEW', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELED'];
 const PRIORITY_COLORS = { LOW: '#22c55e', MEDIUM: '#f97316', HIGH: '#ef4444' };
@@ -25,16 +25,16 @@ export default function TaskViewPage() {
   const [statusPopup, setStatusPopup] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<TaskHistoryResponse[]>([]);
-  const { changeStatus: wsChangeStatus } = useKanban(Number(projectId));
+  const { username } = useAuthStore();
 
-  // const [comments, setComments] = useState<CommentResponse[]>([]);
-  // const [commentText, setCommentText] = useState('');
-  // const [isSending, setIsSending] = useState(false);
+
   const { comments, sendComment, connected } = useTaskComments(Number(taskId));
   const [commentText, setCommentText] = useState('');
 
   const { alert, showAlert, hideAlert } = useAlert();
   const popupRef = useRef<HTMLDivElement>(null);
+
+  const [commentsCollapsed, setCommentsCollapsed] = useState(false);
 
   useEffect(() => {
     if (!taskId) return;
@@ -60,26 +60,22 @@ export default function TaskViewPage() {
       .then(setTask)
       .catch(() => showAlert('Ошибка загрузки задачи', 'error'))
       .finally(() => setLoading(false));
-    // // Загружаем комментарии
-    // commentsApi.getByTask(Number(taskId))
-    //   .then(setComments)
-    //   .catch(() => { });
   }, [taskId]);
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     sendComment(commentText);
-    setCommentText(''); // очищаем сразу — сервер пришлёт обратно через подписку
+    setCommentText('');
   };
 
 
-const { changeStatus } = useKanban(
-  Number(projectId),
-  (updated) => {
-    if (updated.id === Number(taskId)) setTask(updated);
-  }
-);
+  const { changeStatus } = useKanban(
+    Number(projectId),
+    (updated) => {
+      if (updated.id === Number(taskId)) setTask(updated);
+    }
+  );
 
 
   const loadHistory = async () => {
@@ -224,65 +220,100 @@ const { changeStatus } = useKanban(
             </div>
           )}
         </section>
-
-        <div className="task-actions">
+        <div className="task-actions" style={{ marginBottom: '1.5rem' }}>
           <Link to={`/projects/${projectId}/tasks/${taskId}/edit`} className="btn-action">
             Редактировать
           </Link>
-          <button className="btn-action btn-danger" onClick={deleteTask}>
+          <button className="btn-danger" onClick={deleteTask}>
             Удалить
           </button>
         </div>
+        <TaskAttachments
+          projectId={Number(projectId)}
+          taskId={Number(taskId)}
+          canUpload={true}
+          currentUsername={username}
+          isOwner={userRole === 'OWNER' || userRole === 'ADMIN'}
+          showAlert={showAlert}
+        />
+
 
         {/* Comments */}
-        <div className="comments-section">
-          <h3>Комментарии</h3>
-
-          <form className="comment-form" onSubmit={handleCommentSubmit}>
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Напишите комментарий..."
-              required
-              rows={3}
-              // disabled={isSending}
-            />
-            <button 
-              type="submit" 
-              className="btn-action" 
-              disabled={!commentText.trim() || !connected}
+        {/* Comments */}
+        <div className="comments-section" style={{ marginTop: '1.5rem' }}>
+          <div className="attachments-header" style={{ marginBottom: commentsCollapsed ? 0 : '1rem' }}>
+            <button
+              className="attachments-collapse-btn"
+              onClick={() => setCommentsCollapsed(prev => !prev)}
             >
-              {connected ? 'Отправить' : 'Подключение...'}
+              <h3 style={{
+                color: 'var(--text)',
+                margin: 0,
+                background: 'none',
+                WebkitTextFillColor: 'var(--text)',
+                WebkitBackgroundClip: 'unset',
+              }}>
+                Комментарии
+              </h3>
+              <span className="material-icons" style={{
+                fontSize: '20px',
+                color: 'var(--text-secondary)',
+                transition: 'transform 0.2s',
+                transform: commentsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+              }}>
+                expand_more
+              </span>
             </button>
-          </form>
-
-          <div className="comments-list-container">
-            <div className="comments-list">
-              {comments.length === 0 ? (
-                <div className="empty-comments"><p>Пока нет комментариев</p></div>
-              ) : (
-                comments.map((c) => (
-                  <div key={c.id} className="comment-item">
-                    <div className="comment-avatar">
-                      {c.author.avatarUrl
-                        ? <img src={c.author.avatarUrl} alt={c.author.username} />
-                        : <span>{c.author.username.slice(0, 2).toUpperCase()}</span>
-                      }
-                    </div>
-                    <div className="comment-body">
-                      <div className="comment-header">
-                        <Link to={`/profile/${c.author.username}`} style={{ fontWeight: 600, color: 'var(--text)', textDecoration: 'none' }}>
-                          {c.author.username}
-                        </Link>
-                        <span className="comment-date">{c.createdAt}</span>
-                      </div>
-                      <p className="comment-text">{c.text}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
           </div>
+
+          {!commentsCollapsed && (
+            <>
+              <form className="comment-form" onSubmit={handleCommentSubmit}>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Напишите комментарий..."
+                  required
+                  rows={3}
+                />
+                <button
+                  type="submit"
+                  className="btn-action"
+                  disabled={!commentText.trim() || !connected}
+                >
+                  {connected ? 'Отправить' : 'Подключение...'}
+                </button>
+              </form>
+
+              <div className="comments-list-container">
+                <div className="comments-list">
+                  {comments.length === 0 ? (
+                    <div className="empty-comments"><p>Пока нет комментариев</p></div>
+                  ) : (
+                    comments.map((c) => (
+                      <div key={c.id} className="comment-item">
+                        <div className="comment-avatar">
+                          {c.author.avatarUrl
+                            ? <img src={c.author.avatarUrl} alt={c.author.username} />
+                            : <span>{c.author.username.slice(0, 2).toUpperCase()}</span>
+                          }
+                        </div>
+                        <div className="comment-body">
+                          <div className="comment-header">
+                            <Link to={`/profile/${c.author.username}`} style={{ fontWeight: 600, color: 'var(--text)', textDecoration: 'none' }}>
+                              {c.author.username}
+                            </Link>
+                            <span className="comment-date">{c.createdAt}</span>
+                          </div>
+                          <p className="comment-text">{c.text}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

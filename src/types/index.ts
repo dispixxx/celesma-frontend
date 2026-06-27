@@ -114,6 +114,22 @@ export interface TaskRequest {
   endDate: string;
 }
 
+export interface TaskAttachmentResponse {
+  id: number;
+  task: {
+    id: number;
+    title: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+  };
+  uploadedBy: UserResponseDto;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
+
 // AI
 export type AiDescriptionAction = 'TITLE' | 'IMPROVE' | 'FORMALIZE' | 'SUBTASKS';
 
